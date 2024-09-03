@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+func checkError(e error){
+	if(e != nil){
+		panic(e)
+	}
+}
+
 // Creating an alias of fmt.Println
 var pl = fmt.Println
 var pf = fmt.Printf

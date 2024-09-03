@@ -22,6 +22,7 @@ func assignment3() {
 				break
 			} else {
 				pl("Number is not between 1 and 10.")
+				break
 			}
 		}
 	}

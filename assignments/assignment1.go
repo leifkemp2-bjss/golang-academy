@@ -5,5 +5,5 @@ var string2 = "bar"
 var string3 = "baz"
 
 func assignment1() {
-	pf("%s %s %s", string1, string2, string3)
+	pf("%s %s %s\n", string1, string2, string3)
 }
