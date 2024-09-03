@@ -22,6 +22,9 @@ func randRange(min, max int) int {
 }
 
 func outcome(input int)string{
+	if input < 2 || input > 12{
+		panic("Invalid outcome.")
+	}
 	switch input{
 	case 7, 11:
 		return "NATURAL"
