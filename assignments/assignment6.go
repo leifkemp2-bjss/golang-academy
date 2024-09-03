@@ -46,7 +46,7 @@ func assignment6() {
 func calculateAge(day, month, year int)(result int){
 	date := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 
-	pl("Date Constructed: " + time.Time.String(date))
+	pf("Date Constructed: %s\n", time.Time.String(date))
 
 	result = age.Age(date)
 

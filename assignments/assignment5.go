@@ -12,10 +12,10 @@ func assignment5() {
 	doubleDigitSum := sumNumbers(2)
 	tripleDigitSum := sumNumbers(3)
 
-	pl("Sum of single digit numbers: " + strconv.Itoa(singleDigitSum))
-	pl("Sum of double digit numbers: " + strconv.Itoa(doubleDigitSum))
-	pl("Sum of triple digit numbers: " + strconv.Itoa(tripleDigitSum))
-	pl("Total: " + strconv.Itoa(singleDigitSum+doubleDigitSum+tripleDigitSum))
+	pf("Sum of single digit numbers: %d\n", strconv.Itoa(singleDigitSum))
+	pf("Sum of double digit numbers: %d\n", strconv.Itoa(doubleDigitSum))
+	pf("Sum of triple digit numbers: %d\n", strconv.Itoa(tripleDigitSum))
+	pf("Total: ", strconv.Itoa(singleDigitSum+doubleDigitSum+tripleDigitSum))
 }
 
 func sumNumbers(digits int) (sum int) {
@@ -24,7 +24,7 @@ func sumNumbers(digits int) (sum int) {
 	reader := bufio.NewReader(os.Stdin)
 
 	for count < 3 {
-		pl("Please enter a " + strconv.Itoa(digits) + " digit number.")
+		pf("Please enter a %d digit number.\n", digits)
 		input, err := reader.ReadString('\n')
 
 		if err != nil {
@@ -38,7 +38,7 @@ func sumNumbers(digits int) (sum int) {
 				continue
 			} else {
 				if len(inputTrimmed) != digits {
-					pl("This input is not a " + strconv.Itoa(digits) + " digit number.")
+					pf("This input is not a %d digit number.\n", digits)
 					continue
 				} else {
 					sum += num
