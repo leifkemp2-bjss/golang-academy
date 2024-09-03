@@ -21,7 +21,7 @@ func main() {
 		"7": assignment7,
 	}
 
-	pl("Select an assignment (1-6)")
+	pl("Select an assignment (1-7)")
 
 	reader := bufio.NewReader(os.Stdin)
 	function, _ := reader.ReadString('\n')
