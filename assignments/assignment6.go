@@ -1,14 +1,54 @@
 package main
 
-import(
-	"github.com/bearbin/go-age"
+import (
+	"bufio"
+	"os"
+	"strconv"
 	"time"
+	"strings"
+
+	"github.com/bearbin/go-age"
 )
 
 func assignment6() {
-	date := time.Date(2000, 3, 10, 0, 0, 0, 0, time.UTC)
+	reader := bufio.NewReader(os.Stdin)
 
-	res := age.Age(date)
+	for {
+		pl("Input the day.")
+		day, _ := reader.ReadString('\n')
+		dayI, err := strconv.Atoi(strings.TrimSpace(day))
+		if err != nil {
+			pl("Invalid input for day.")
+			continue
+		}
 
-	pl(res)
+		pl("Input the month.")
+		month, _ := reader.ReadString('\n')
+		monthI, err2 := strconv.Atoi(strings.TrimSpace(month))
+		if err2 != nil {
+			pl("Invalid input for month.")
+			continue
+		}
+
+		pl("Input the year.")
+		year, _ := reader.ReadString('\n')
+		yearI, err3 := strconv.Atoi(strings.TrimSpace(year))
+		if err3 != nil {
+			pl("Invalid input for year.")
+			continue
+		}
+
+		pl("Age: " + strconv.Itoa(calculateAge(dayI, monthI, yearI)))
+		break
+	}
+}
+
+func calculateAge(day, month, year int)(result int){
+	date := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
+
+	pl("Date Constructed: " + time.Time.String(date))
+
+	result = age.Age(date)
+
+	return
 }
