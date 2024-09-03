@@ -1,5 +1,7 @@
 package main
 
 func assignment7(){
-	pl("foo")
+	for x := 0; x < 500; x++{
+		// foo
+	}
 }
