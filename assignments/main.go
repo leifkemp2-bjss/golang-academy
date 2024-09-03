@@ -18,6 +18,7 @@ func main() {
 		"4": assignment4,
 		"5": assignment5,
 		"6": assignment6,
+		"7": assignment7,
 	}
 
 	pl("Select an assignment (1-6)")
