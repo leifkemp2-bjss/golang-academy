@@ -6,7 +6,9 @@ import(
 )
 
 func assignment6() {
-	now := time.Now()
+	date := time.Date(2000, 3, 10, 0, 0, 0, 0, time.UTC)
 
-	age.Age(now)
+	res := age.Age(date)
+
+	pl(res)
 }
