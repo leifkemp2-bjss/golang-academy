@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 )
@@ -13,7 +14,11 @@ func assignment7(){
 		sum := dice1 + dice2
 
 		pl("Rolls: " + strconv.Itoa(dice1) + " " + strconv.Itoa(dice2) + " Sum: " + strconv.Itoa(sum))
-		pl(outcome(sum))
+		result, err := outcome(sum)
+		if err != nil{
+			panic(err)
+		}
+		pl(result)
 	}
 }
 
@@ -21,18 +26,18 @@ func randRange(min, max int) int {
 	return rand.Intn(max+1-min)+min
 }
 
-func outcome(input int)string{
+func outcome(input int)(string, error){
 	if input < 2 || input > 12{
-		panic("Invalid outcome.")
+		return "", fmt.Errorf("invalid outcome")
 	}
 	switch input{
 	case 7, 11:
-		return "NATURAL"
+		return "NATURAL", nil
 	case 2:
-		return "SNAKE-EYES-CRAPS"
+		return "SNAKE-EYES-CRAPS", nil
 	case 3, 12:
-		return "LOSS-CRAPS"
+		return "LOSS-CRAPS", nil
 	default:
-		return "NEUTRAL"
+		return "NEUTRAL", nil
 	}
 }
