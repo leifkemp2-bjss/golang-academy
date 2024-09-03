@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Creating an alias of fmt.Println
 var pl = fmt.Println
@@ -16,4 +18,6 @@ func main() {
 	assignment4()
 	pl("\nAssignment 5")
 	assignment5()
+	pl("\nAssignment 6")
+	assignment6()
 }

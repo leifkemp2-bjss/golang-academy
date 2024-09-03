@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func assignment2() {
+func assignment2() (result string) {
 	pl("Enter your first name")
 	reader := bufio.NewReader(os.Stdin)
 	firstName, _ := reader.ReadString('\n')
@@ -14,5 +14,7 @@ func assignment2() {
 	middleName, _ := reader.ReadString('\n')
 	pl("Enter your last name")
 	lastName, _ := reader.ReadString('\n')
-	pl("Hello " + strings.TrimSpace(firstName) + " " + strings.TrimSpace(middleName) + " " + strings.TrimSpace(lastName))
+	result = "Hello " + strings.TrimSpace(firstName) + " " + strings.TrimSpace(middleName) + " " + strings.TrimSpace(lastName)
+	pl(result)
+	return
 }
