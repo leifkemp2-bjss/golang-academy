@@ -53,10 +53,12 @@ func (s ByCase) Less(i, j int) bool {
 func assignment8(){
 	arr := []string{"Abu Dhabi", "London", "Washington D.C.", "Montevideo", "Vatican City", "Caracas", "Hanoi"}
 	// Write the file first
-	writeToFile(arr)
+	writeToFile(arr, "citynames")
 
 	// Now read the file
-	arr_from_file := readFile()
+	arr_from_file, err := readFile("citynames")
+	checkError(err)
+	pl(arr_from_file)
 
 	// Arrange the list in alphabetical order
 
@@ -64,14 +66,19 @@ func assignment8(){
 	pl(arr_from_file)
 }
 
-func writeToFile(arr []string){
-	f_w, err := os.Create("./files/citynames")
+func writeToFile(arr []string, filename string){
+	f_w, err := os.Create("./files/" + filename)
 	checkError(err)
 
 	defer f_w.Close()
 
-	for x := 0; x < len(arr); x++{
-		size, err := f_w.WriteString(arr[x] + "\n")
+	for x := 0; x <= len(arr) - 1; x++{
+		stringToWrite := arr[x]
+		if x != len(arr) - 1 {
+			stringToWrite += "\n"
+		}
+
+		size, err := f_w.WriteString(stringToWrite)
 		checkError(err)
 		pf("Wrote %d bytes to file\n", size)
 
@@ -79,12 +86,14 @@ func writeToFile(arr []string){
 	}
 }
 
-func readFile()(result []string){
-	f_r, err := os.ReadFile("./files/citynames")
-	checkError(err)
-	result = strings.Split(string(f_r), "\n")
-	pl(result)
-	return
+func readFile(filename string)([]string, error){
+	f_r, err := os.ReadFile("./files/" + filename)
+	if err != nil {
+		return nil, err
+	}
+
+	result := strings.Split(string(f_r), "\n")
+	return result, nil
 }
 
 func sortByCase(arr []string){

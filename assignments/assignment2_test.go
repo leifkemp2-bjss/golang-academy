@@ -21,7 +21,7 @@ func TestMissingNames(t *testing.T){
 	// A name should be valid without a middle name
 	result, _ := buildName("John", "", "Test")
 	if result != "John Test"{
-		t.Error("output has not produced the correct name (with no middle name)")
+		t.Error("this is a valid name (with no middle name)")
 	}
 
 	// A missing last name should report an error

@@ -28,10 +28,11 @@ func main() {
 		"6": assignment6,
 		"7": assignment7,
 		"8": assignment8,
+		"9": assignment9,
 	}
 
 	for {
-		pl("Select an assignment (1-8)")
+		pl("Select an assignment (1-9)")
 
 		reader := bufio.NewReader(os.Stdin)
 		function, _ := reader.ReadString('\n')
