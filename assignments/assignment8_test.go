@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func init(){
+func setup_8(){
 	if _, err := os.Stat("./files/testfile"); err == nil {
 		os.Remove("./files/testfile")
 	}
@@ -39,7 +39,7 @@ func init(){
 	}
 }
 
-func shutdown(){
+func shutdown_8(){
 	if _, err := os.Stat("./files/testfile"); err == nil {
 		os.Remove("./files/testfile")
 	}
@@ -48,13 +48,14 @@ func shutdown(){
 	}
 }
 
-// overrides the default main method provided in testing
-// adding a shutdown method to remove all of the files created
-// during the testing process
-func TestMain(m *testing.M){
-	m.Run()
-	shutdown()
-}
+// // overrides the default main method provided in testing
+// // adding a shutdown method to remove all of the files created
+// // during the testing process
+// func TestMain(m *testing.M){
+// 	setup_8()
+// 	m.Run()
+// 	shutdown()
+// }
 
 func TestWriteFile(t *testing.T){
 	arr := []string{"Test", "Test 2"}

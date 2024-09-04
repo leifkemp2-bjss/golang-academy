@@ -11,9 +11,18 @@ import (
 	"github.com/bearbin/go-age"
 )
 
-var ageFunc = age.Age
+type Ager interface {
+	Age(birthDate time.Time) int
+}
+
+type DefaultAger struct{}
+
+func (d *DefaultAger) Age(birthDate time.Time) int{
+	return age.Age(birthDate)
+}
 
 func assignment6() {
+	ager := &DefaultAger{}
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -41,7 +50,7 @@ func assignment6() {
 			continue
 		}
 
-		age, err := calculateAge(dayI, monthI, yearI)
+		age, err := calculateAge(dayI, monthI, yearI, ager)
 		if err != nil { 
 			pl(err)
 			continue
@@ -59,7 +68,7 @@ func isDateValid(day, month, year int)(bool){
 	return err == nil
 }
 
-func calculateAge(day, month, year int)(result int, err error){
+func calculateAge(day, month, year int, ager Ager)(result int, err error){
 	if !isDateValid(day, month, year) {
 		return -1, fmt.Errorf("this date is not valid: %d-%d-%d", day, month, year)
 	}
@@ -67,7 +76,7 @@ func calculateAge(day, month, year int)(result int, err error){
 
 	pf("Date Constructed: %s\n", time.Time.String(date))
 
-	result = ageFunc(date)
+	result = ager.Age(date)
 
 	return result, nil
 }

@@ -7,10 +7,11 @@ import (
 	"time"
 )
 
-func init() {
-	ageFunc = func(birthDate time.Time) int{
-		return age.AgeAt(birthDate, time.Date(2024, time.Month(1), 1, 0, 0, 0, 0, time.UTC))
-	}
+type MockAger struct{}
+
+// This Ager runs the age function against a fixed date of 1st Jan, 2024 to make these tests future-proof.
+func (m *MockAger) Age(birthDate time.Time) int{
+	return age.AgeAt(birthDate, time.Date(2024, time.Month(1), 1, 0, 0, 0, 0, time.UTC))
 }
 
 func TestIsDateValid(t *testing.T){
@@ -58,7 +59,9 @@ func TestIsDateValid(t *testing.T){
 }
 
 func TestCalculateAge(t *testing.T){
-	result, err := calculateAge(1, 1, 2023)
+	mockAger := &MockAger{}
+
+	result, err := calculateAge(1, 1, 2023, mockAger)
 
 	if err != nil {
 		t.Error("the program has encountered an unexpected error")
@@ -67,7 +70,7 @@ func TestCalculateAge(t *testing.T){
 		t.Errorf("the age has not been calculated correctly, expecting 1, got %d\n", result)
 	}
 
-	result, err = calculateAge(1, 9, 2023)
+	result, err = calculateAge(1, 9, 2023, mockAger)
 
 	if err != nil {
 		t.Error("the program has encountered an unexpected error")
@@ -78,7 +81,9 @@ func TestCalculateAge(t *testing.T){
 }
 
 func TestCalculateAgeInvalidDate(t *testing.T){
-	_, err := calculateAge(0, 1, 2001)
+	mockAger := &MockAger{}
+
+	_, err := calculateAge(0, 1, 2001, mockAger)
 
 	if err == nil {
 		t.Error("the program should have outputted an error for this invalid date")
