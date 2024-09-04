@@ -48,8 +48,11 @@ func shutdown(){
 	}
 }
 
+// overrides the default main method provided in testing
+// adding a shutdown method to remove all of the files created
+// during the testing process
 func TestMain(m *testing.M){
-	m.Run() // force the tests to run sequentially
+	m.Run()
 	shutdown()
 }
 

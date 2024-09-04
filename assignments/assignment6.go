@@ -2,13 +2,16 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strconv"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/bearbin/go-age"
 )
+
+var ageFunc = age.Age
 
 func assignment6() {
 	reader := bufio.NewReader(os.Stdin)
@@ -38,17 +41,33 @@ func assignment6() {
 			continue
 		}
 
-		pl("Age: " + strconv.Itoa(calculateAge(dayI, monthI, yearI)))
+		age, err := calculateAge(dayI, monthI, yearI)
+		if err != nil { 
+			pl(err)
+			continue
+		}
+
+		pf("Age: %d", age)
 		break
 	}
 }
 
-func calculateAge(day, month, year int)(result int){
+func isDateValid(day, month, year int)(bool){
+	dateString := fmt.Sprintf("%d-%.3s-%02d", year, time.Month(month), day)
+	const shortForm = "2006-Jan-02"
+	_, err := time.Parse(shortForm, dateString)
+	return err == nil
+}
+
+func calculateAge(day, month, year int)(result int, err error){
+	if !isDateValid(day, month, year) {
+		return -1, fmt.Errorf("this date is not valid: %d-%d-%d", day, month, year)
+	}
 	date := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 
 	pf("Date Constructed: %s\n", time.Time.String(date))
 
-	result = age.Age(date)
+	result = ageFunc(date)
 
-	return
+	return result, nil
 }
