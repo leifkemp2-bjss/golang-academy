@@ -13,7 +13,7 @@ func assignment3() {
 	reader := bufio.NewReader(os.Stdin)
 	input, _ := reader.ReadString('\n')
 
-	result, err := isNumberInRange(input)
+	result, err := isNumberInRange(strings.TrimSpace(input))
 	checkError(err)
 	
 	if result {
@@ -24,14 +24,10 @@ func assignment3() {
 }
 
 func isNumberInRange(input string)(bool, error){
-	num, err := strconv.Atoi(strings.TrimSpace(input))
+	num, err := strconv.Atoi(input)
 	if err != nil {
 		return false, fmt.Errorf("invalid input, must be an integer")
 	} else {
-		if num >= 1 && num <= 10 {
-			return true, nil
-		} else {
-			return false, nil
-		}
+		return num >= 1 && num <= 10, nil
 	}
 }

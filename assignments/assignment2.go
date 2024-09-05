@@ -7,40 +7,46 @@ import (
 	"strings"
 )
 
-func checkNameIsValid(name string){
+func checkNameIsValid(name string)(error){
 	if(strings.TrimSpace(name) == ""){
-		panic("No name has been provided.")
+		return fmt.Errorf("No name has been provided.")
 	}
+	return nil
 }
 
 func assignment2() {
-	pl("Enter your first name")
 	reader := bufio.NewReader(os.Stdin)
-	firstName, _ := reader.ReadString('\n')
-	checkNameIsValid(firstName)
+	firstName, middleName, lastName := "", "", ""
+	for {
+		pl("Enter your first name")
+		firstName, _ = reader.ReadString('\n')
+		if checkNameIsValid(firstName) != nil {
+			continue
+		}
+		break
+	}
 
 	pl("Enter your middle name")
-	middleName, _ := reader.ReadString('\n')
+	middleName, _ = reader.ReadString('\n')
 
-	pl("Enter your last name")
-	lastName, _ := reader.ReadString('\n')
-	checkNameIsValid(lastName)
+	for {
+		pl("Enter your first name")
+		lastName, _ = reader.ReadString('\n')
+		if checkNameIsValid(lastName) != nil {
+			continue
+		}
+		break
+	}
 
+	// if we get to this point the name is valid
 	pl(buildName(strings.TrimSpace(firstName), strings.TrimSpace(middleName), strings.TrimSpace(lastName)))
 }
 
-func buildName(firstName, middleName, lastName string) (string, error){
-	if firstName == "" {
-		return "", fmt.Errorf("first name has not been provided")
-	}
-	if lastName == "" {
-		return "", fmt.Errorf("last name has not been provided")
-	}
-
+func buildName(firstName, middleName, lastName string) (string){
 	result := firstName
 	if(middleName != ""){
 		result += (fmt.Sprintf(" %s", middleName))
 	}
 	result += (fmt.Sprintf(" %s", lastName))
-	return result, nil
+	return result
 }

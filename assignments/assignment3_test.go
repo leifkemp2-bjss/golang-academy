@@ -2,29 +2,36 @@ package main
 
 import(
 	"testing"
+	"fmt"
 )
 
-func TestValidNumber(t *testing.T){
-	result, err := isNumberInRange("1")
-	if err != nil{
-		t.Error("the program has returned an error when it shouldn't")
+func TestIsNumberInRange(t *testing.T){
+	cases := []struct{
+		num string
+		outcome bool
+	}{
+		{num: "1", outcome: true},
+		{num: "5", outcome: true},
+		{num: "10", outcome: true},
+		{num: "0", outcome: false},
+		{num: "11", outcome: false},
+		{num: "-1", outcome: false},
 	}
-	if result != true{
-		t.Error("the program has returned false, expecting true")
+
+	for _, test := range cases {
+		t.Run(fmt.Sprintf("testing validity of %s", test.num), func(t *testing.T){
+			got, err := isNumberInRange(test.num)
+			if err != nil {
+				t.Error("the program has returned an unexpected error")
+			}
+			if got != test.outcome {
+				t.Errorf("got %t, want %t", got, test.outcome)
+			}
+		})
 	}
 }
 
-func TestInvalidNumber(t *testing.T){
-	result, err := isNumberInRange("-1")
-	if err != nil{
-		t.Error("the program has returned an error when it shouldn't")
-	}
-	if result != false{
-		t.Error("the program has returned true, expecting false")
-	}
-}
-
-func TestInvalidInp(t *testing.T){
+func TestInvalidInput(t *testing.T){
 	_, err := isNumberInRange("Test")
 	if err == nil{
 		t.Error("the program has not returned an error when it should")

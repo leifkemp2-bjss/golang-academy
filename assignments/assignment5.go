@@ -33,6 +33,7 @@ func sumNumbers(digits int) (sum int) {
 		} else {
 			inputTrimmed := strings.TrimSpace(input)
 			num, err2 := strconv.Atoi(inputTrimmed)
+			
 			if err2 != nil {
 				pl("This input is not an integer.")
 				continue

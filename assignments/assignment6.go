@@ -24,30 +24,41 @@ func (d *DefaultAger) Age(birthDate time.Time) int{
 func assignment6() {
 	ager := &DefaultAger{}
 	reader := bufio.NewReader(os.Stdin)
-
+	
 	for {
-		pl("Input the day.")
-		day, _ := reader.ReadString('\n')
-		dayI, err := strconv.Atoi(strings.TrimSpace(day))
-		if err != nil {
-			pl("Invalid input for day.")
-			continue
-		}
+		day, month, year := "", "", ""
+		dayI, monthI, yearI := 0, 0, 0
+		var err error
 
-		pl("Input the month.")
-		month, _ := reader.ReadString('\n')
-		monthI, err2 := strconv.Atoi(strings.TrimSpace(month))
-		if err2 != nil {
-			pl("Invalid input for month.")
-			continue
+		for {
+			pl("Input the day.")
+			day, _ = reader.ReadString('\n')
+			dayI, err = strconv.Atoi(strings.TrimSpace(day))
+			if err != nil {
+				pl("Invalid input for day.")
+				continue
+			}
+			break
 		}
-
-		pl("Input the year.")
-		year, _ := reader.ReadString('\n')
-		yearI, err3 := strconv.Atoi(strings.TrimSpace(year))
-		if err3 != nil {
-			pl("Invalid input for year.")
-			continue
+		for {
+			pl("Input the month.")
+			month, _ = reader.ReadString('\n')
+			monthI, err = strconv.Atoi(strings.TrimSpace(month))
+			if err != nil {
+				pl("Invalid input for month.")
+				continue
+			}
+			break
+		}
+		for {
+			pl("Input the year.")
+			year, _ = reader.ReadString('\n')
+			yearI, err = strconv.Atoi(strings.TrimSpace(year))
+			if err != nil {
+				pl("Invalid input for year.")
+				continue
+			}
+			break
 		}
 
 		age, err := calculateAge(dayI, monthI, yearI, ager)

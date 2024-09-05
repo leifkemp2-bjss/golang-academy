@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
-	"github.com/bearbin/go-age"
 	"time"
+
+	"github.com/bearbin/go-age"
 )
 
 type MockAger struct{}
@@ -15,46 +17,32 @@ func (m *MockAger) Age(birthDate time.Time) int{
 }
 
 func TestIsDateValid(t *testing.T){
-	result := isDateValid(33, 1, 2001)
-
-	if result {
-		t.Error("this date is not valid")
+	cases := []struct {
+		day int
+		month int
+		year int
+		outcome bool
+	}{
+		{day: 31, month: 1, year: 2001, outcome: true},
+		{day: 29, month: 2, year: 2004, outcome: true},
+		{day: 29, month: 2, year: 2000, outcome: true},
+		{day: 29, month: 2, year: 1900, outcome: false},
+		{day: 33, month: 1, year: 2001, outcome: false},
+		{day: 0, month: 1, year: 2001, outcome: false},
+		{day: -5, month: 1, year: 2001, outcome: false},
+		{day: 31, month: 0, year: 2001, outcome: false},
+		{day: 31, month: -5, year: 2001, outcome: false},
+		{day: 31, month: 13, year: 2001, outcome: false},
+		{day: 31, month: 1, year: -5, outcome: false},
 	}
 
-	result = isDateValid(0, 1, 2001)
-
-	if result {
-		t.Error("this date is not valid")
-	}
-
-	result = isDateValid(-5, 1, 2001)
-
-	if result {
-		t.Error("this date is not valid")
-	}
-
-	result = isDateValid(15, 0, 2001)
-
-	if result {
-		t.Error("this date is not valid")
-	}
-
-	result = isDateValid(15, -5, 2001)
-
-	if result {
-		t.Error("this date is not valid")
-	}
-
-	result = isDateValid(15, 13, 2001)
-
-	if result {
-		t.Error("this date is not valid")
-	}
-
-	result = isDateValid(15, 12, -5)
-
-	if result {
-		t.Error("this date is not valid")
+	for _, test := range cases {
+		t.Run(fmt.Sprintf("testing validity of %d-%d-%d", test.day, test.month, test.year), func(t *testing.T){
+			got := isDateValid(test.day, test.month, test.year)
+			if got != test.outcome {
+				t.Errorf("got %t, want %t", got, test.outcome)
+			}
+		})
 	}
 }
 
