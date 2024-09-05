@@ -2,21 +2,25 @@ package main
 
 import (
 	"fmt"
+	"reflect"
+	"slices"
 	"time"
 )
 
 type institute interface{
-	register(name string, dob string)([]*student, error)
+	register(name string, dob string)([]student, error)
+	remove(name string)([]student, error)
 	list() string
 	calculateAgeFromDOB(dob string, ager Ager)(int, error)
 }
 
 type school struct {
-	students []*student
+	students []student
 	ager Ager
 }
 
-func(s school) register(name string, dob string)([]*student, error){
+// Registers a new student to the school's students array, and returns the new array
+func(s school) register(name string, dob string)([]student, error){
 	studentName, err := createName(name)
 	if err != nil {
 		return nil, err
@@ -32,21 +36,16 @@ func(s school) register(name string, dob string)([]*student, error){
 		age: studentAge,
 	}
 
-	s.students = append(s.students, &student)
-
-	return s.students, nil
+	return append(s.students, student), nil
 }
 
-func(s school) calculateAgeFromDOB(dob string, ager Ager)(int, error){
-	const shortForm = "2006-Jan-02"
-	date, err := time.Parse(shortForm, dob)
-	if err != nil {
-		return -1, fmt.Errorf("this date is not valid: %s", dob)
-	}
-
-	result := s.ager.Age(date)
-
-	return result, nil
+// Remove the first student that has this name
+func(s school) remove(name name)([]student){
+	newArr := slices.DeleteFunc(s.students, func(s student) bool {
+		return reflect.DeepEqual(s.name, name)
+	})
+	
+	return newArr
 }
 
 func(s school) list() string{
@@ -62,6 +61,18 @@ func(s school) list() string{
 	return result
 }
 
+func(s school) calculateAgeFromDOB(dob string, ager Ager)(int, error){
+	const shortForm = "2006-Jan-02"
+	date, err := time.Parse(shortForm, dob)
+	if err != nil {
+		return -1, fmt.Errorf("this date is not valid: %s", dob)
+	}
+
+	result := s.ager.Age(date)
+
+	return result, nil
+}
+
 type student struct {
 	name name
 	dob  string
@@ -74,7 +85,7 @@ func (s student) String() string {
 
 func assignment10(){
 	mySchool := school{
-		students: []*student{},
+		students: []student{},
 		ager: &DefaultAger{},
 	}
 
@@ -88,6 +99,12 @@ func assignment10(){
 	mySchool.students, _ = mySchool.register("Beef Kemp", "1950-Nov-25")
 	mySchool.students, _ = mySchool.register("Kemp Leif", "1998-Jan-31")
 	mySchool.students, _ = mySchool.register("Llll Kkkk", "1111-Jun-11")
+
+	pl(mySchool.list())
+
+	pl()
+	pl("Evil Leif Kemp got expelled for being evil. Here's the new student list:")
+	mySchool.students = mySchool.remove(name{firstName: "Evil", middleName: "Leif", lastName: "Kemp"})
 
 	pl(mySchool.list())
 }

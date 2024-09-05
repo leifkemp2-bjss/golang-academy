@@ -23,7 +23,7 @@ func TestDisplayStudent(t *testing.T){
 
 func TestCreateStudent(t *testing.T){
 	school := school{
-		students: []*student{},
+		students: []student{},
 		ager: &MockAger{},
 	}
 
@@ -57,8 +57,8 @@ func TestCreateStudent(t *testing.T){
 				t.Errorf("the program hit an unexpected error: %s", err)
 				return
 			}
-			if !reflect.DeepEqual(*school.students[i], test.want){
-				t.Errorf("expected %+v, got %+v", test.want, *school.students[i])
+			if !reflect.DeepEqual(school.students[i], test.want){
+				t.Errorf("expected %+v, got %+v", test.want, school.students[i])
 			}
 		})
 	}
@@ -70,7 +70,7 @@ func TestCreateStudent(t *testing.T){
 
 func TestCreateStudentInvalid(t *testing.T){
 	school := school{
-		students: []*student{},
+		students: []student{},
 		ager: &MockAger{},
 	}
 
@@ -106,14 +106,14 @@ func TestListStudents(t *testing.T){
 	}{
 		{
 			school: school{
-				students: []*student{},
+				students: []student{},
 				ager: &MockAger{},
 			}, 
 			want: "",
 		},
 		{
 			school: school{
-				students: []*student{
+				students: []student{
 					{
 						name: name{firstName: "John", middleName: "", lastName: "Student"},
 						dob: "2006-Jan-01",
@@ -126,7 +126,7 @@ func TestListStudents(t *testing.T){
 		},
 		{
 			school: school{
-				students: []*student{
+				students: []student{
 					{
 						name: name{firstName: "John", middleName: "", lastName: "Student"},
 						dob: "2006-Jan-01",
@@ -152,5 +152,37 @@ func TestListStudents(t *testing.T){
 				t.Errorf("expected %s, got %s", test.want, got)
 			}
 		})
+	}
+}
+
+func TestRemoveStudent(t *testing.T){
+	school := school{
+		students: []student{
+			{
+				name: name{firstName: "John", middleName: "", lastName: "Student"},
+				dob: "2006-Jan-01",
+				age: 18,
+			},
+			{
+				name: name{firstName: "John", middleName: "Peter", lastName: "Student"},
+				dob: "2006-Jan-31",
+				age: 17,
+			},
+		},
+		ager: &MockAger{},
+	}
+
+	if len(school.students) != 2 {
+		t.Error("the school should have 2 students")
+	}
+
+	school.students = school.remove(name{firstName: "John", middleName: "", lastName: "Student"})
+
+	if len(school.students) != 1 {
+		t.Error("the school should have 1 student")
+	}
+
+	if !reflect.DeepEqual(school.students[0].name, name{firstName: "John", middleName: "Peter", lastName: "Student"}){
+		t.Error("the remaining student should be John Peter Student")
 	}
 }
