@@ -6,6 +6,8 @@ import(
 	"github.com/bearbin/go-age"
 )
 
+type MockAger struct{}
+
 // This Ager runs the age function against a fixed date of 1st Jan, 2024 to make these tests future-proof.
 func (m *MockAger) Age(birthDate time.Time) int{
 	return age.AgeAt(birthDate, time.Date(2024, time.Month(1), 1, 0, 0, 0, 0, time.UTC))

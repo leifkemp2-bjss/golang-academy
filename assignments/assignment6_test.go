@@ -5,8 +5,6 @@ import (
 	"testing"
 )
 
-type MockAger struct{}
-
 func TestIsDateValid(t *testing.T){
 	cases := []struct {
 		day int

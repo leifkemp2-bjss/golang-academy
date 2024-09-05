@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"testing"
+	"reflect"
 )
 
 func TestValidNames(t *testing.T){
@@ -22,14 +23,8 @@ func TestValidNames(t *testing.T){
 				t.Error("the program hit an unexpected error")
 			}
 
-			if(got.firstName != test.name.firstName){
-				t.Errorf("firstName: expected %s, got %s", test.name.firstName, got.firstName)
-			}
-			if(got.middleName != test.name.middleName){
-				t.Errorf("middleName: expected %s, got %s", test.name.middleName, got.middleName)
-			}
-			if(got.lastName != test.name.lastName){
-				t.Errorf("lastName: expected %s, got %s", test.name.lastName, got.lastName)
+			if !reflect.DeepEqual(*got, test.name){
+				t.Errorf("expected %+v, got %+v", test.name, got)
 			}
 		})
 	}
