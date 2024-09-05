@@ -9,7 +9,7 @@ import (
 
 func checkNameIsValid(name string)(error){
 	if(strings.TrimSpace(name) == ""){
-		return fmt.Errorf("No name has been provided.")
+		return fmt.Errorf("no name has been provided")
 	}
 	return nil
 }
