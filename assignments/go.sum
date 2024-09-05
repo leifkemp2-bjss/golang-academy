@@ -1,2 +1,4 @@
 github.com/bearbin/go-age v0.0.0-20210220235509-f0fa00c278ce h1:y0vebNjNSykdrY/4T4lhcng0ZIwrD4xkpf45lTW3Ops=
 github.com/bearbin/go-age v0.0.0-20210220235509-f0fa00c278ce/go.mod h1:74S2AyUVLNHXov5+dDdQZgOjQIzmmllrzfQcDz76F6k=
+github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
+github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=

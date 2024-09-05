@@ -1,77 +1,48 @@
 package main
 
-import(
+import (
+	"fmt"
 	"testing"
 )
 
-func TestValidNameFull(t *testing.T){
-	nameTest := new(name)
-	err := createName(nameTest, "John Peter Test")
-
-	if err != nil {
-		t.Error("the program hit an unexpected error")
+func TestValidNames(t *testing.T){
+	cases := []struct{
+		input string
+		name name
+	}{
+		{input: "John Peter Test", name: name{firstName: "John", middleName: "Peter", lastName: "Test",}},
+		{input: "John Peter Pete Test", name: name{firstName: "John", middleName: "Peter", lastName: "Test",}},
+		{input: "John Test", name: name{firstName: "John", lastName: "Test",}},
 	}
 
-	if nameTest.firstName != "John" {
-		t.Errorf("the first name has not been set properly, expecting John, got %s\n", nameTest.firstName)
-	}
-	if nameTest.middleName != "Peter" {
-		t.Errorf("the middle name has not been set properly, expecting Peter, got %s\n", nameTest.middleName)
-	}
-	if nameTest.lastName != "Test" {
-		t.Errorf("the last name has not been set properly, expecting Test, got %s\n", nameTest.lastName)
-	}
-}
+	for _, test := range cases{
+		t.Run(fmt.Sprintf("testing validity of %s", test.input), func(t *testing.T) {
+			got, err := createName(test.input)
+			if err != nil {
+				t.Error("the program hit an unexpected error")
+			}
 
-func TestValidNameNoMiddle(t *testing.T){
-	nameTest := new(name)
-	err := createName(nameTest, "John Test")
-
-	if err != nil {
-		t.Error("the program hit an unexpected error")
-	}
-
-	if nameTest.firstName != "John" {
-		t.Errorf("the first name has not been set properly, expecting John, got %s\n", nameTest.firstName)
-	}
-	if nameTest.lastName != "Test" {
-		t.Errorf("the last name has not been set properly, expecting Test, got %s\n", nameTest.lastName)
-	}
-
-	if nameTest.middleName != "" {
-		t.Errorf("the middle name has erroneously set, expecting an empty string, got %s\n", nameTest.middleName)
-	}
-}
-
-func TestValidNameMultipleMiddle(t *testing.T){
-	// the program should only create a name with one middle name
-	nameTest := new(name)
-	err := createName(nameTest, "John Peter Pete Test")
-
-	if err != nil {
-		t.Error("the program hit an unexpected error")
-	}
-
-	if nameTest.firstName != "John" {
-		t.Errorf("the first name has not been set properly, expecting John, got %s\n", nameTest.firstName)
-	}
-	if nameTest.middleName != "Peter" {
-		t.Errorf("the middle name has not been set properly, expecting Peter, got %s\n", nameTest.middleName)
-	}
-	if nameTest.lastName != "Test" {
-		t.Errorf("the last name has not been set properly, expecting Test, got %s\n", nameTest.lastName)
+			if(got.firstName != test.name.firstName){
+				t.Errorf("firstName: expected %s, got %s", test.name.firstName, got.firstName)
+			}
+			if(got.middleName != test.name.middleName){
+				t.Errorf("middleName: expected %s, got %s", test.name.middleName, got.middleName)
+			}
+			if(got.lastName != test.name.lastName){
+				t.Errorf("lastName: expected %s, got %s", test.name.lastName, got.lastName)
+			}
+		})
 	}
 }
 
 func TestInvalid(t *testing.T){
-	nameTest := new(name)
-	err := createName(nameTest, "John")
+	_, err := createName("John")
 
 	if err == nil {
 		t.Error("this name is invalid")
 	}
 
-	err = createName(nameTest, "")
+	_, err = createName("")
 
 	if err == nil {
 		t.Error("this name is invalid")
