@@ -6,9 +6,9 @@ import (
 )
 
 type institute interface{
-	register(string, string) student
+	register(name string, dob string)([]*student, error)
 	list() string
-	calculateAgeFromDOB(string, Ager)
+	calculateAgeFromDOB(dob string, ager Ager)(int, error)
 }
 
 type school struct {
@@ -37,14 +37,14 @@ func(s school) register(name string, dob string)([]*student, error){
 	return s.students, nil
 }
 
-func(s school) calculateAgeFromDOB(dob string, ager Ager)(result int, err error){
+func(s school) calculateAgeFromDOB(dob string, ager Ager)(int, error){
 	const shortForm = "2006-Jan-02"
 	date, err := time.Parse(shortForm, dob)
 	if err != nil {
 		return -1, fmt.Errorf("this date is not valid: %s", dob)
 	}
 
-	result = s.ager.Age(date)
+	result := s.ager.Age(date)
 
 	return result, nil
 }
