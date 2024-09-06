@@ -2,9 +2,40 @@ package todo
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 )
+
+var testFileDir = "../files/testfile"
+
+func setup(){
+	if _, err := os.Stat(testFileDir); err == nil {
+		os.Remove(testFileDir)
+	}
+
+	if _, err := os.Stat(testFileDir); err == nil {
+		// The file still exists for some reason
+		panic(testFileDir)
+	}
+}
+
+func shutdown(){
+	if _, err := os.Stat(testFileDir); err == nil {
+		os.Remove(testFileDir)
+	}
+
+	if _, err := os.Stat(testFileDir); err == nil {
+		// The file still exists for some reason
+		panic(testFileDir)
+	}
+}
+
+func TestMain(m *testing.M){
+	setup()
+	defer shutdown()
+	m.Run()
+}
 
 func TestListTodos(t *testing.T){
 	cases := []struct{
@@ -65,5 +96,37 @@ func TestListTodosAsJSON(t *testing.T){
 				t.Errorf("expected %s got %s", test.want, got)
 			}
 		})
+	}
+}
+
+func TestOutputTodosToJSONFile(t *testing.T){
+	todoList := []Todo{
+		{Contents: "create a test that outputs a Todo list to file", Status: "todo"},
+		{Contents: "check the file exists", Status: "completed"},
+		{Contents: "check the file's contents", Status: "inprogress"},
+	}
+
+	expected := []byte(
+		`[{"Contents":"create a test that outputs a Todo list to file","Status":"todo"},`+ 
+		`{"Contents":"check the file exists","Status":"completed"},`+
+		`{"Contents":"check the file's contents","Status":"inprogress"}]`,
+	)
+
+	err := OutputTodosToJSONFile("../files/testfile.json", todoList...)
+	if err != nil {
+		t.Error("the program hit an unexpected error")
+	}
+
+	if _, err := os.Stat("../files/testfile"); err == nil {
+		t.Error("the testfile.json does not exist")
+	}
+
+	result, err := os.ReadFile("../files/testfile.json")
+	if err != nil {
+		t.Error("the program hit an unexpected error trying to read the file")
+	}
+
+	if !reflect.DeepEqual(result, expected) {
+		t.Errorf("the array contents have not been read properly, expecting \n%s, got \n%s", expected, result)
 	}
 }

@@ -23,4 +23,10 @@ func main(){
 	todoJSON, _ := todo.ListTodosAsJSON(todoList...)
 
 	fmt.Println(string(todoJSON))
+
+	err := todo.OutputTodosToJSONFile("./files/todolist.json", todoList...)
+
+	if err != nil {
+		fmt.Print(err)
+	}
 }

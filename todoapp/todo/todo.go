@@ -3,6 +3,7 @@ package todo
 import (
 	"fmt"
 	"encoding/json"
+	"os"
 )
 
 type Todo struct {
@@ -26,8 +27,35 @@ func ListTodos(todos ...Todo) string{
 	return result
 }
 
+// returns the list of Todo objects as a JSON object
 func ListTodosAsJSON(todos ... Todo)([]byte, error){
 	result, err := json.Marshal(todos)
 
 	return result, err
+}
+
+func OutputTodosToJSONFile(dir string, todos ... Todo)(error){
+	todosJSON, err := ListTodosAsJSON(todos...)
+
+	if err != nil {
+		return err
+	}
+
+	err = writeJSONToFile(dir, todosJSON)
+
+	return err
+}
+
+func writeJSONToFile(dir string, json []byte)(error){
+	f, err := os.Create(dir)
+
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	_, err = f.Write(json)
+
+	return err
 }
