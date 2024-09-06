@@ -16,7 +16,7 @@ func setup(){
 
 	if _, err := os.Stat(testFileDir); err == nil {
 		// The file still exists for some reason
-		panic(testFileDir)
+		panic("the testfile.json file still exists when it should be removed")
 	}
 }
 
@@ -27,7 +27,7 @@ func shutdown(){
 
 	if _, err := os.Stat(testFileDir); err == nil {
 		// The file still exists for some reason
-		panic(testFileDir)
+		panic("the testfile.json file still exists when it should be removed")
 	}
 }
 
