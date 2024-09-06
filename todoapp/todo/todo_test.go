@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-var testFileDir = "../files/testfile"
+var testFileDir = "../files/testfile.json"
 
 func setup(){
 	if _, err := os.Stat(testFileDir); err == nil {
