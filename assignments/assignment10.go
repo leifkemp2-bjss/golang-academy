@@ -20,14 +20,14 @@ type school struct {
 }
 
 // Registers a new student to the school's students array, and returns the new array
-func(s school) register(name string, dob string)([]student, error){
+func(s *school) register(name string, dob string)(error){
 	studentName, err := createName(name)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	studentAge, err2 := s.calculateAgeFromDOB(dob, s.ager)
 	if err2 != nil {
-		return nil, err2
+		return err2
 	}
 
 	student := student{
@@ -36,11 +36,14 @@ func(s school) register(name string, dob string)([]student, error){
 		age: studentAge,
 	}
 
-	return append(s.students, student), nil
+	s.students = append(s.students, student)
+
+	// return append(s.students, student), nil
+	return nil
 }
 
 // Remove the first student that has this name
-func(s school) remove(name name)([]student){
+func(s *school) remove(name name)([]student){
 	newArr := slices.DeleteFunc(s.students, func(s student) bool {
 		return reflect.DeepEqual(s.name, name)
 	})
@@ -48,7 +51,7 @@ func(s school) remove(name name)([]student){
 	return newArr
 }
 
-func(s school) list() string{
+func(s *school) list() string{
 	result := ""
 
 	for i, student := range s.students{
@@ -61,7 +64,7 @@ func(s school) list() string{
 	return result
 }
 
-func(s school) calculateAgeFromDOB(dob string, ager Ager)(int, error){
+func(s *school) calculateAgeFromDOB(dob string, ager Ager)(int, error){
 	const shortForm = "2006-Jan-02"
 	date, err := time.Parse(shortForm, dob)
 	if err != nil {
@@ -89,16 +92,16 @@ func assignment10(){
 		ager: &DefaultAger{},
 	}
 
-	mySchool.students, _ = mySchool.register("Leif Kemp", "2001-Nov-25")
-	mySchool.students, _ = mySchool.register("Leif Alexander Kemp", "2001-Nov-25")
-	mySchool.students, _ = mySchool.register("Leif Pemp", "2002-Nov-25")
-	mySchool.students, _ = mySchool.register("Keif Lemp", "2001-Nov-24")
-	mySchool.students, _ = mySchool.register("Fiel Pmek", "1002-Nov-25")
-	mySchool.students, _ = mySchool.register("Evil Leif Kemp", "2001-Oct-31")
-	mySchool.students, _ = mySchool.register("Leaf Kemp", "2004-Aug-25")
-	mySchool.students, _ = mySchool.register("Beef Kemp", "1950-Nov-25")
-	mySchool.students, _ = mySchool.register("Kemp Leif", "1998-Jan-31")
-	mySchool.students, _ = mySchool.register("Llll Kkkk", "1111-Jun-11")
+	_ = mySchool.register("Leif Kemp", "2001-Nov-25")
+	_ = mySchool.register("Leif Alexander Kemp", "2001-Nov-25")
+	_ = mySchool.register("Leif Pemp", "2002-Nov-25")
+	_ = mySchool.register("Keif Lemp", "2001-Nov-24")
+	_ = mySchool.register("Fiel Pmek", "1002-Nov-25")
+	_ = mySchool.register("Evil Leif Kemp", "2001-Oct-31")
+	_ = mySchool.register("Leaf Kemp", "2004-Aug-25")
+	_ = mySchool.register("Beef Kemp", "1950-Nov-25")
+	_ = mySchool.register("Kemp Leif", "1998-Jan-31")
+	_ = mySchool.register("Llll Kkkk", "1111-Jun-11")
 
 	pl(mySchool.list())
 

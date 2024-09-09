@@ -51,8 +51,7 @@ func TestCreateStudent(t *testing.T){
 
 	for i, test := range students{
 		t.Run(fmt.Sprintf("testing creation of student %s", test.name), func(t *testing.T) {
-			var err error
-			school.students, err = school.register(test.name, test.dob)
+			err := school.register(test.name, test.dob)
 			if err != nil {
 				t.Errorf("the program hit an unexpected error: %s", err)
 				return
@@ -86,7 +85,7 @@ func TestCreateStudentInvalid(t *testing.T){
 
 	for _, test := range students{
 		t.Run(fmt.Sprintf("testing creation of student %s", test.name), func(t *testing.T) {
-			_, err := school.register(test.name, test.dob)
+			err := school.register(test.name, test.dob)
 			if err == nil {
 				t.Errorf("this student should've produced an error: %+v", test)
 				return
