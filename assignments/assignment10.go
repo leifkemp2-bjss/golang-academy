@@ -9,7 +9,7 @@ import (
 
 type institute interface{
 	register(name string, dob string)(error)
-	remove(name name)()
+	remove(name name)
 	list() string
 	calculateAgeFromDOB(dob string, ager Ager)(int, error)
 }
