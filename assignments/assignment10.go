@@ -8,8 +8,8 @@ import (
 )
 
 type institute interface{
-	register(name string, dob string)([]student, error)
-	remove(name string)([]student, error)
+	register(name string, dob string)(error)
+	remove(name name)()
 	list() string
 	calculateAgeFromDOB(dob string, ager Ager)(int, error)
 }
@@ -19,7 +19,7 @@ type school struct {
 	ager Ager
 }
 
-// Registers a new student to the school's students array, and returns the new array
+// Registers a new student to the school's students array
 func(s *school) register(name string, dob string)(error){
 	studentName, err := createName(name)
 	if err != nil {
@@ -38,17 +38,14 @@ func(s *school) register(name string, dob string)(error){
 
 	s.students = append(s.students, student)
 
-	// return append(s.students, student), nil
 	return nil
 }
 
 // Remove the first student that has this name
-func(s *school) remove(name name)([]student){
-	newArr := slices.DeleteFunc(s.students, func(s student) bool {
+func(s *school) remove(name name)(){
+	s.students = slices.DeleteFunc(s.students, func(s student) bool {
 		return reflect.DeepEqual(s.name, name)
 	})
-	
-	return newArr
 }
 
 func(s *school) list() string{
@@ -107,7 +104,7 @@ func assignment10(){
 
 	pl()
 	pl("Evil Leif Kemp got expelled for being evil. Here's the new student list:")
-	mySchool.students = mySchool.remove(name{firstName: "Evil", middleName: "Leif", lastName: "Kemp"})
+	mySchool.remove(name{firstName: "Evil", middleName: "Leif", lastName: "Kemp"})
 
 	pl(mySchool.list())
 }

@@ -175,7 +175,7 @@ func TestRemoveStudent(t *testing.T){
 		t.Error("the school should have 2 students")
 	}
 
-	school.students = school.remove(name{firstName: "John", middleName: "", lastName: "Student"})
+	school.remove(name{firstName: "John", middleName: "", lastName: "Student"})
 
 	if len(school.students) != 1 {
 		t.Error("the school should have 1 student")
