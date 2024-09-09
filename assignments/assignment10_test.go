@@ -184,4 +184,15 @@ func TestRemoveStudent(t *testing.T){
 	if !reflect.DeepEqual(school.students[0].name, name{firstName: "John", middleName: "Peter", lastName: "Student"}){
 		t.Error("the remaining student should be John Peter Student")
 	}
+
+	// removing a student who doesn't exist should do nothing
+	school.remove(name{firstName: "Doesn't", middleName: "", lastName: "Exist"})
+
+	if len(school.students) != 1 {
+		t.Error("the school should have 1 student after removing a student that doesn't exist")
+	}
+
+	if !reflect.DeepEqual(school.students[0].name, name{firstName: "John", middleName: "Peter", lastName: "Student"}){
+		t.Error("the remaining student should be John Peter Student after removing a student that doesn't exist")
+	}
 }

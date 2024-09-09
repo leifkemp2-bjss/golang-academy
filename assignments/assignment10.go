@@ -89,16 +89,28 @@ func assignment10(){
 		ager: &DefaultAger{},
 	}
 
-	_ = mySchool.register("Leif Kemp", "2001-Nov-25")
-	_ = mySchool.register("Leif Alexander Kemp", "2001-Nov-25")
-	_ = mySchool.register("Leif Pemp", "2002-Nov-25")
-	_ = mySchool.register("Keif Lemp", "2001-Nov-24")
-	_ = mySchool.register("Fiel Pmek", "1002-Nov-25")
-	_ = mySchool.register("Evil Leif Kemp", "2001-Oct-31")
-	_ = mySchool.register("Leaf Kemp", "2004-Aug-25")
-	_ = mySchool.register("Beef Kemp", "1950-Nov-25")
-	_ = mySchool.register("Kemp Leif", "1998-Jan-31")
-	_ = mySchool.register("Llll Kkkk", "1111-Jun-11")
+	studentsToAdd := []struct{
+		name string
+		dob string
+	}{
+		{name: "Leif Kemp", dob: "2001-Nov-25"},
+		{name: "Leif Alexander Kemp", dob: "2001-Nov-25"},
+		{name: "Leif Pemp", dob: "2002-Nov-25"},
+		{name: "Keif Lemp", dob: "2001-Nov-24"},
+		{name: "Fiel Pmek", dob: "1002-Nov-25"},
+		{name: "Evil Leif Kemp", dob: "2001-Oct-31"},
+		{name: "Leaf Kemp", dob: "2004-Aug-25"},
+		{name: "Beef Kemp", dob: "1950-Nov-25"},
+		{name: "Kemp Leif", dob: "1998-Jan-31"},
+		{name: "Llll Kkkk", dob: "1111-Jun-11"},
+	}
+
+	for _, student := range studentsToAdd{
+		err := mySchool.register(student.name, student.dob)
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	pl(mySchool.list())
 
