@@ -15,6 +15,14 @@ func main(){
 			Contents: "second foo bar todo",
 			Status: "completed",
 		},
+		{
+			Contents: "third foo bar todo",
+			Status: "inprogress",
+		},
+		{
+			Contents: "fourth foo bar todo",
+			Status: "completed",
+		},
 	}
 	
 	err := todo.OutputTodosToJSONFile("./files/todolist.json", todoList...)
@@ -31,4 +39,6 @@ func main(){
 	fmt.Println(todo.ListTodos(readResult...))
 
 	ex14()
+
+	ex16(todoList...)
 }
