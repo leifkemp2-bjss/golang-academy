@@ -108,7 +108,8 @@ func assignment10(){
 	for _, student := range studentsToAdd{
 		err := mySchool.register(student.name, student.dob)
 		if err != nil {
-			panic(err)
+			fmt.Println(err.Error())
+			return
 		}
 	}
 
