@@ -16,17 +16,17 @@ func main(){
 			Status: "completed",
 		},
 	}
-	fmt.Println("foo")	
-
-	fmt.Println(todo.ListTodos(todoList...))
-
-	todoJSON, _ := todo.ListTodosAsJSON(todoList...)
-
-	fmt.Println(string(todoJSON))
-
+	
 	err := todo.OutputTodosToJSONFile("./files/todolist.json", todoList...)
 
 	if err != nil {
 		fmt.Print(err)
 	}
+
+	readResult, _ := todo.ReadTodosFromFile("./files/todolist.json")
+	if err != nil {
+		fmt.Print(err)
+	}
+
+	fmt.Println(todo.ListTodos(readResult...))
 }

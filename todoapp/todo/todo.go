@@ -59,3 +59,16 @@ func writeJSONToFile(dir string, json []byte)(error){
 
 	return err
 }
+
+func ReadTodosFromFile(dir string)([]Todo, error){
+	f_r, err := os.ReadFile(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	result := []Todo{}
+	
+	err = json.Unmarshal(f_r, &result)
+
+	return result, err
+}
