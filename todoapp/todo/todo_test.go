@@ -56,15 +56,15 @@ func TestListTodos(t *testing.T){
 			want: "",
 		},
 		{
-			todos: []Todo{{Contents: "create a test with only 1 Todo", Status: "todo"}},
-			want: "0: create a test with only 1 Todo, Status: todo",
+			todos: []Todo{{Id: 0, Contents: "create a test with only 1 Todo", Status: "todo"}},
+			want: "0: create a test with only 1 Todo - todo\n",
 		},
 		{
 			todos: []Todo{
-				{Contents: "create a test with multiple Todos", Status: "todo"},
-				{Contents: "create multiple Todos for the test", Status: "completed"},
+				{Id: 0, Contents: "create a test with multiple Todos", Status: "todo"},
+				{Id: 1, Contents: "create multiple Todos for the test", Status: "completed"},
 			},
-			want: "0: create a test with multiple Todos, Status: todo\n1: create multiple Todos for the test, Status: completed",
+			want: "0: create a test with multiple Todos - todo\n1: create multiple Todos for the test - completed\n",
 		},
 	}
 
@@ -89,8 +89,8 @@ func TestListTodosAsJSON(t *testing.T){
 			want: []byte(``),
 		},
 		{
-			todos: []Todo{{Contents: "create a test with only 1 Todo", Status: "todo"}},
-			want: []byte(`{"Contents": "create a test with only 1 Todo","Status": "todo"}`),
+			todos: []Todo{{Id: 0, Contents: "create a test with only 1 Todo", Status: "todo"}},
+			want: []byte(`{"Id":0,"Contents": "create a test with only 1 Todo","Status": "todo"}`),
 		},
 	}
 
@@ -110,15 +110,15 @@ func TestListTodosAsJSON(t *testing.T){
 
 func TestOutputTodosToJSONFile(t *testing.T){
 	todoList := []Todo{
-		{Contents: "create a test that outputs a Todo list to file", Status: "todo"},
-		{Contents: "check the file exists", Status: "completed"},
-		{Contents: "check the file's contents", Status: "inprogress"},
+		{Id: 0, Contents: "create a test that outputs a Todo list to file", Status: "todo"},
+		{Id: 1, Contents: "check the file exists", Status: "completed"},
+		{Id: 2, Contents: "check the file's contents", Status: "inprogress"},
 	}
 
 	expected := []byte(
-		`[{"Contents":"create a test that outputs a Todo list to file","Status":"todo"},`+ 
-		`{"Contents":"check the file exists","Status":"completed"},`+
-		`{"Contents":"check the file's contents","Status":"inprogress"}]`,
+		`[{"Id":0,"Contents":"create a test that outputs a Todo list to file","Status":"todo"},`+ 
+		`{"Id":1,"Contents":"check the file exists","Status":"completed"},`+
+		`{"Id":2,"Contents":"check the file's contents","Status":"inprogress"}]`,
 	)
 
 	err := OutputTodosToJSONFile(testFileDirs[0], todoList...)

@@ -7,22 +7,20 @@ import (
 )
 
 type Todo struct {
+	Id int
 	Contents string
 	Status string
 }
 
 func (t Todo) String() string {
-	return fmt.Sprintf("%s, Status: %s", t.Contents, t.Status)
+	return fmt.Sprintf("%d: %s - %s", t.Id, t.Contents, t.Status)
 }
 
 // returns the list of Todo objects in a printable and readable format
 func ListTodos(todos ...Todo) string{
 	result := ""
-	for i, todo := range todos {
-		result += fmt.Sprintf("%d: %v", i, todo)
-		if i != len(todos) - 1 {
-			result += "\n"
-		}
+	for _, todo := range todos {
+		result += fmt.Sprintf("%v\n", todo)
 	}
 	return result
 }
@@ -71,4 +69,28 @@ func ReadTodosFromFile(dir string)([]Todo, error){
 	err = json.Unmarshal(f_r, &result)
 
 	return result, err
+}
+
+// Part 2 Functions
+
+type TodoList map[int]Todo
+
+func (t TodoList) ReadInMemory (id int)(Todo, error){
+	todo, err := t[id]
+	if !err {
+		return Todo{}, fmt.Errorf("Todo item with id %d not found", id)
+	}
+	return todo, nil
+}
+
+func CreateInMemory(){
+
+}
+
+func UpdateInMemory(){
+
+}
+
+func DeleteInMemory(){
+
 }
