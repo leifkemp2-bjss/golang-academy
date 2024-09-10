@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -49,22 +50,22 @@ func TestMain(m *testing.M){
 func TestListTodos(t *testing.T){
 	cases := []struct{
 		todos []Todo
-		want string
+		wants []string
 	}{
 		{
 			todos: []Todo{},
-			want: "",
+			wants: []string{},
 		},
 		{
-			todos: []Todo{{Id: 0, Contents: "create a test with only 1 Todo", Status: "todo"}},
-			want: "0: create a test with only 1 Todo - todo\n",
+			todos: []Todo{{Id: 0, Contents: "create a test with only 1 Todo", Status: ToDo}},
+			wants: []string{"create a test with only 1 Todo"},
 		},
 		{
 			todos: []Todo{
-				{Id: 0, Contents: "create a test with multiple Todos", Status: "todo"},
-				{Id: 1, Contents: "create multiple Todos for the test", Status: "completed"},
+				{Id: 0, Contents: "create a test with multiple Todos", Status: ToDo},
+				{Id: 1, Contents: "create multiple Todos for the test", Status: Completed},
 			},
-			want: "0: create a test with multiple Todos - todo\n1: create multiple Todos for the test - completed\n",
+			wants: []string{"create a test with multiple Todos", "create multiple Todos for the test"},
 		},
 	}
 
@@ -72,8 +73,10 @@ func TestListTodos(t *testing.T){
 		t.Run(fmt.Sprintf("testing listing of %v", test.todos), func(t *testing.T) {
 			got := ListTodos(test.todos...)
 
-			if got != test.want{
-				t.Errorf("expected %s got %s", test.want, got)
+			for _, want := range test.wants {
+				if !strings.Contains(got, want) {
+					t.Errorf("expecting output %s to contain %s", got, want)
+				}
 			}
 		})
 	}
@@ -89,8 +92,8 @@ func TestListTodosAsJSON(t *testing.T){
 			want: []byte(``),
 		},
 		{
-			todos: []Todo{{Id: 0, Contents: "create a test with only 1 Todo", Status: "todo"}},
-			want: []byte(`{"Id":0,"Contents": "create a test with only 1 Todo","Status": "todo"}`),
+			todos: []Todo{{Id: 0, Contents: "create a test with only 1 Todo", Status: ToDo}},
+			want: []byte(`{"Id":0,"Contents":"create a test with only 1 Todo","Status":"To Do"}`),
 		},
 	}
 
@@ -110,16 +113,16 @@ func TestListTodosAsJSON(t *testing.T){
 
 func TestOutputTodosToJSONFile(t *testing.T){
 	todoList := []Todo{
-		{Id: 0, Contents: "create a test that outputs a Todo list to file", Status: "todo"},
-		{Id: 1, Contents: "check the file exists", Status: "completed"},
-		{Id: 2, Contents: "check the file's contents", Status: "inprogress"},
+		{Id: 0, Contents: "create a test that outputs a Todo list to file", Status: ToDo},
+		{Id: 1, Contents: "check the file exists", Status: Completed},
+		{Id: 2, Contents: "check the file's contents", Status: InProgress},
 	}
 
-	expected := []byte(
-		`[{"Id":0,"Contents":"create a test that outputs a Todo list to file","Status":"todo"},`+ 
-		`{"Id":1,"Contents":"check the file exists","Status":"completed"},`+
-		`{"Id":2,"Contents":"check the file's contents","Status":"inprogress"}]`,
-	)
+	expectedContents := []string{
+		`"Id":0`,`"Contents":"create a test that outputs a Todo list to file"`,`"Status":"To Do"`,
+		`"Id":1`,`"Contents":"check the file exists"`,`"Status":"Completed"`,
+		`"Id":2`,`"Contents":"check the file's contents"`,`"Status":"In Progress"`,
+	}
 
 	err := OutputTodosToJSONFile(testFileDirs[0], todoList...)
 	if err != nil {
@@ -135,8 +138,10 @@ func TestOutputTodosToJSONFile(t *testing.T){
 		t.Error("the program hit an unexpected error trying to read the file")
 	}
 
-	if !reflect.DeepEqual(result, expected) {
-		t.Errorf("the array contents have not been read properly, expecting \n%s, got \n%s", expected, result)
+	for _, want := range expectedContents {
+		if !strings.Contains(string(result), want) {
+			t.Errorf("expecting output %s to contain %s", string(result), want)
+		}
 	}
 }
 

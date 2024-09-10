@@ -1,8 +1,8 @@
 package todo
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 	"os"
 )
 
@@ -73,6 +73,12 @@ func ReadTodosFromFile(dir string)([]Todo, error){
 
 // Part 2 Functions
 
+const (
+	ToDo = "To Do"
+	InProgress = "In Progress"
+	Completed = "Completed"
+)
+
 type TodoList map[int]Todo
 
 func (t TodoList) ReadInMemory (id int)(Todo, error){
@@ -83,14 +89,54 @@ func (t TodoList) ReadInMemory (id int)(Todo, error){
 	return todo, nil
 }
 
-func CreateInMemory(){
+func (t TodoList) ListInMemory() string{
+	result := ""
+	for _, todo := range t {
+		result += fmt.Sprintf("%v\n", todo)
+	}
+	return result
+}
 
+func (t TodoList) CreateInMemory(contents string)(Todo, error){
+	if contents == "" {
+		return Todo{}, fmt.Errorf("contents cannot be empty")
+	}
+
+	iters := 0
+	for iters < 1000 {
+		_, ok := t[iters]
+
+		if !ok {
+			// Found an Id that isn't in use
+			break
+		}
+		iters++
+	}
+
+	if iters == 1000 {
+		return Todo{}, fmt.Errorf("could not generate an unused ID for this Todo item")
+	}
+
+	todo := Todo{
+		Id: iters,
+		Contents: contents,
+		Status: ToDo,
+	}
+
+	t[iters] = todo
+
+	return todo, nil
 }
 
 func UpdateInMemory(){
 
 }
 
-func DeleteInMemory(){
-
+func (t TodoList) DeleteInMemory(id int)(error){
+	_, ok := t[id]
+	if !ok {
+		return fmt.Errorf("item with id %d does not exist", id)
+	}
+	delete(t, id)
+	return nil
 }
