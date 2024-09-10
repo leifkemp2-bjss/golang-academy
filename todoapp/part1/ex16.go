@@ -19,7 +19,6 @@ func ex16(todoList ...todo.Todo){
 
 	go func(){
 		defer wg.Done()
-
 		for _, t := range todoList{
 			contentsChan <- t.Contents
 		}
@@ -37,7 +36,6 @@ func ex16(todoList ...todo.Todo){
 		fmt.Println(c)
 		s := <- statusChan
 		fmt.Println(s)
-
 		fmt.Printf("Todo %d: %s - %s\n", todo.Id, c, s)
 	}
 
