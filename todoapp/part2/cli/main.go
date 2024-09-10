@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"academy.com/todoapp/todo"
@@ -12,7 +13,7 @@ import (
 func main(){
 	todos := todo.TodoList{}
 
-	commands := map[string]string{
+	commandsList := map[string]string{
 		"help": "Lists all available commands",
 		"create": "Creates a new Todo item",
 		"read {id}": "Reads a Todo item by id",
@@ -25,15 +26,26 @@ func main(){
 	for {
 		fmt.Print("Enter command: ")
 		input, _ := reader.ReadString('\n')
-		command := strings.Split(strings.TrimSpace(input), " ")
+		commands := strings.Split(strings.TrimSpace(input), " ")
 
-		switch command[0] {
+		switch commands[0] {
 		case "help":
-			for k, v := range commands {
+			for k, v := range commandsList {
 				fmt.Printf("%s: %s\n", k, v)
 			}
 		case "read":
-			todo, err := todos.ReadInMemory(0)
+			if len(commands) < 2 {
+				fmt.Println("id field has not been provided")
+				continue
+			}
+
+			id, err := strconv.Atoi(commands[1])
+			if err != nil {
+				fmt.Println("id field is invalid")
+				continue
+			}
+
+			todo, err := todos.ReadInMemory(id)
 			if err != nil {
 				fmt.Println(err)
 				continue
@@ -47,6 +59,4 @@ func main(){
 
 		fmt.Println()
 	}
-
-	fmt.Println(todos)
 }
