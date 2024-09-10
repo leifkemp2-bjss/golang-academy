@@ -1,91 +1,138 @@
 package main
 
 import (
-	"bufio"
+	"flag"
 	"fmt"
 	"os"
-	"strconv"
-	"strings"
 
 	"academy.com/todoapp/todo"
 )
 
+var dir = "../../files/todolist_cli.json"
+
 func main(){
-	todos := todo.TodoList{
-		0: {Id: 0, Contents: "Read the list", Status: todo.InProgress},
-		1: {Id: 1, Contents: "Add to the list", Status: todo.ToDo},
-	}
+	todos := todo.TodoList{}
+	err := todos.ReadTodosFromFileToMemory(dir)
+	if err != nil {
+		
+		if _, ok := err.(*os.PathError); ok{
+			fmt.Println("file does not exist, creating now")
+			f, err := os.Create(dir)
 
-	commandsList := map[string]string{
-		"help": "Lists all available commands",
-		"create": "Creates a new Todo item",
-		"read {id}": "Reads a Todo item by id",
-		"list": "Lists all Todo items",
-		"update": "Updates a Todo item",
-		"delete {id}": "Deletes a Todo item by id",
-	}
-
-	reader := bufio.NewReader(os.Stdin)
-	for {
-		fmt.Println()
-		fmt.Print("Enter command (type help for list): ")
-		input, _ := reader.ReadString('\n')
-		inputTrimmed := strings.TrimSpace(input)
-		commands := strings.Split(inputTrimmed, " ")
-
-		switch commands[0] {
-		case "help":
-			for k, v := range commandsList {
-				fmt.Printf("%s: %s\n", k, v)
-			}
-		case "read":
-			if len(commands) < 2 {
-				fmt.Println("id field has not been provided")
-				continue
-			}
-
-			id, err := strconv.Atoi(commands[1])
-			if err != nil {
-				fmt.Println("id field is invalid")
-				continue
-			}
-
-			todo, err := todos.ReadInMemory(id)
 			if err != nil {
 				fmt.Println(err)
-				continue
+				return
 			}
-			fmt.Println(todo)
-		case "list":
-			fmt.Print(todos.ListInMemory())
-		case "create":
-			fmt.Print("Enter contents of Todo item: ")
-			contents, _ := reader.ReadString('\n')
-			
-			i, err := todos.CreateInMemory(strings.TrimSpace(contents))
-			if err != nil {
-				fmt.Println(err)
-			}
-			fmt.Printf("New Todo created! Id: %d\n", i.Id)
-		case "delete":
-			if len(commands) < 2 {
-				fmt.Println("id field has not been provided")
-				continue
-			}
-
-			id, err := strconv.Atoi(commands[1])
-			if err != nil {
-				fmt.Println("id field is invalid")
-				continue
-			}
-
-			err = todos.DeleteInMemory(id)
-			if err != nil {
-				fmt.Println(err)
-				continue
-			}
-		default:
-			fmt.Println("Command not found. Use 'help' to list commands.")
+			defer f.Close()
+			f.Write([]byte(`[]`))
+			todos = map[int]todo.Todo{}
+		} else {
+			fmt.Println(err)
+			return
 		}
 	}
+
+	var command string
+
+	flag.StringVar(&command, "command", "", "Choose a command: help, read, list, create, update, delete")
+
+	flag.BoolFunc("l", "Lists all todos", func(s string) error {
+		command = "list"
+		return nil
+	})
+	flag.BoolFunc("r", "Reads a todo by ID", func(s string) error {
+		command = "read"
+		return nil
+	})
+	flag.BoolFunc("d", "Deletes a todo by ID", func(s string) error {
+		command = "delete"
+		return nil
+	})
+	flag.BoolFunc("c", "Creates a todo, contents are required, status is optional", func(s string) error {
+		command = "create"
+		return nil
+	})
+	flag.BoolFunc("u", "Updates a todo with given ID, provided either status or contents are given", func(s string) error {
+		command = "update"
+		return nil
+	})
+
+	id := flag.Int("id", -1, "The ID of the todo")
+	contents := flag.String("contents", "", "The contents of the todo")
+	status := flag.String("status", "", "The status of the todo")
+
+	flag.Parse()
+
+	switch command{
+	case "help":
+		flag.PrintDefaults()
+	case "read":
+		if !IdValid(*id) {
+			return
+		}
+
+		todo, err := todos.ReadInMemory(*id)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println(todo)
+	case "list":
+		fmt.Print(todos.ListInMemory())
+	case "create":
+		if *contents == "" {
+			fmt.Println("content field has not been provided")
+			return
+		}
+
+		i, err := todos.CreateInMemory(*contents, *status)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("New Todo created! Id: %d\n", i.Id)
+		Save(todos)
+	case "update":
+		if !IdValid(*id) {
+			return
+		}
+		if *contents == "" && *status == "" {
+			fmt.Println("content and status fields have not been provided, please provide at least one")
+			return
+		}
+
+		err := todos.UpdateInMemory(*id, *contents, *status)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("Todo ID %d updated!", *id)
+		Save(todos)
+	case "delete":
+		if !IdValid(*id) {
+			return
+		}
+
+		err = todos.DeleteInMemory(*id)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("Todo ID %d deleted!", *id)
+		Save(todos)
+	}
+}
+
+func Save(todos todo.TodoList){
+	err := todos.SaveTodosFromMemoryToFile(dir)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func IdValid(id int) bool {
+	if id < 0 {
+		fmt.Println("id field has not been provided")
+	}
+	return id >= 0
 }

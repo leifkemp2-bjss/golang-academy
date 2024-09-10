@@ -3,7 +3,9 @@ package todo
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
+	"slices"
 )
 
 type Todo struct {
@@ -97,7 +99,7 @@ func (t TodoList) ListInMemory() string{
 	return result
 }
 
-func (t TodoList) CreateInMemory(contents string)(Todo, error){
+func (t TodoList) CreateInMemory(contents string, status string)(Todo, error){
 	if contents == "" {
 		return Todo{}, fmt.Errorf("contents cannot be empty")
 	}
@@ -123,13 +125,41 @@ func (t TodoList) CreateInMemory(contents string)(Todo, error){
 		Status: ToDo,
 	}
 
+	if status != "" {
+		todo.Status = status
+	}
+
 	t[iters] = todo
 
 	return todo, nil
 }
 
-func UpdateInMemory(){
+func (t TodoList) UpdateInMemory(id int, contents string, status string)(error){
+	_, ok := t[id]
+	if !ok {
+		return fmt.Errorf("item with id %d does not exist", id)
+	}
 
+	
+
+	todo := Todo{
+		Id: id,
+		Contents: t[id].Contents,
+		Status: t[id].Status,
+	}
+
+	if contents != "" {
+		todo.Contents = contents
+	}
+	if status != "" {
+		if status != ToDo && status != InProgress && status != Completed {
+			return fmt.Errorf("status is not valid, must be one of the following: %s, %s, %s", ToDo, InProgress, Completed)
+		}
+		todo.Status = status
+	}
+
+	t[id] = todo
+	return nil
 }
 
 func (t TodoList) DeleteInMemory(id int)(error){
@@ -138,5 +168,27 @@ func (t TodoList) DeleteInMemory(id int)(error){
 		return fmt.Errorf("item with id %d does not exist", id)
 	}
 	delete(t, id)
+	return nil
+}
+
+func (t TodoList)ReadTodosFromFileToMemory(dir string)(error){
+	f_r, err := os.ReadFile(dir)
+	if err != nil {
+		return err
+	}
+
+	result := []Todo{}
+	err = json.Unmarshal(f_r, &result)
+	
+	for _, r := range result {
+		t[r.Id] = r
+	}
+
+	return err
+}
+
+func (t *TodoList)SaveTodosFromMemoryToFile(dir string)(error){
+	values := slices.Collect(maps.Values(*t))
+	OutputTodosToJSONFile(dir, values...)
 	return nil
 }
