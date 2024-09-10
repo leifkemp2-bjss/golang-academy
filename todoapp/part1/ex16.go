@@ -14,33 +14,32 @@ func ex16(todoList ...todo.Todo){
 	var wg sync.WaitGroup
 	wg.Add(2)
 
-	// var mu sync.Mutex
-
-	ping := make(chan bool)
+	contentsChan := make(chan string)
+	statusChan := make(chan string)
 
 	go func(){
 		defer wg.Done()
 
 		for _, t := range todoList{
-			// mu.Lock()
-			fmt.Printf("%s\n", t.Contents)
-			// mu.Unlock()
-			ping <- true // Send the first channel ping, which activates the 2nd goroutine
-			<- ping // Block here until we receive a channel ping from the 2nd goroutine
+			contentsChan <- t.Contents
 		}
 	}()
 
 	go func(){
 		defer wg.Done()
 		for _, t := range todoList{
-			<- ping // Wait at the start until we receive a channel ping from the 1st goroutine
-			// This receiver at the start of the loop ensures that the Contents goroutine is first
-			// mu.Lock()
-			fmt.Printf("%s\n", t.Status)
-			// mu.Unlock()
-			ping <- true // Send the second channel ping, which will allow the 1st goroutine to continue
+			statusChan <- t.Status
 		}
 	}()
+
+	for _, todo := range todoList {
+		c := <- contentsChan
+		fmt.Println(c)
+		s := <- statusChan
+		fmt.Println(s)
+
+		fmt.Printf("Todo %d: %s - %s\n", todo.Id, c, s)
+	}
 
 	wg.Wait()
 	fmt.Println("Goroutines have finished")
