@@ -7,73 +7,45 @@ import (
 )
 
 var value = 0
+var mu sync.Mutex
 
 func ex14() int {
-	fmt.Println("Running exercise 14/15")
-
-	// ORIGINAL CODE
-	// This exercise is designed to simulate a race condition
-	
-	// var wg sync.WaitGroup
-	// wg.Add(2)
-
-	// go func(){
-	// 	for i := 0; i <= 20; i++{
-	// 		if i % 2 == 0 {
-	// 			value = i
-	// 			fmt.Printf("Setting value to %d\n", value)
-	// 		}
-	// 	}
-
-	// 	wg.Done()
-	// }()
-
-	// go func(){
-	// 	for i := 0; i <= 20; i++{
-	// 		if i % 2 != 0 {
-	// 			value = i
-	// 			fmt.Printf("Setting value to %d\n", value)
-	// 		}
-	// 	}
-
-	// 	wg.Done()
-	// }()
-
-	// REFACTOR
-	var mu sync.Mutex
 	var wg sync.WaitGroup
+	fmt.Println("Running exercise 14")
 
+	// This exercise is designed to simulate a race condition
 	wg.Add(2)
 
-	// chan1 := make(chan bool)
+	go func(){
+		for i := 0; i <= 10; i++{
+			if i % 2 == 0 {
+				value = i
+				fmt.Printf("Setting value to %d\n", value)
+			}
+		}
 
-	// go func(){
-	// 	for i := 0; i <= 20; i++{
-	// 		if i % 2 == 0 {
-	// 			mu.Lock()
-	// 			value = i
-	// 			mu.Unlock()
-	// 			fmt.Printf("Setting value to %d\n", value)
-	// 		}
-	// 	}
+		wg.Done()
+	}()
 
-	// 	wg.Done()
-	// }()
+	go func(){
+		for i := 0; i <= 10; i++{
+			if i % 2 != 0 {
+				value = i
+				fmt.Printf("Setting value to %d\n", value)
+			}
+		}
 
-	// go func(){
-	// 	for i := 0; i <= 20; i++{
-	// 		if i % 2 != 0 {
-	// 			mu.Lock()
-	// 			value = i
-	// 			mu.Unlock()
-	// 			fmt.Printf("Setting value to %d\n", value)
-	// 		}
-	// 	}
+		wg.Done()
+	}()
 
-	// 	wg.Done()
-	// }()
+	wg.Wait()
+	return value
+}
 
-	// ping := make(chan bool)
+func ex15_mutex() int{
+	fmt.Println("Doing exercise 15 with mutexes")
+	var wg sync.WaitGroup
+	wg.Add(2)
 
 	go func(){
 		defer wg.Done()
@@ -83,21 +55,16 @@ func ex14() int {
 			value = 2 * i
 			fmt.Printf("%d ", value)
 			mu.Unlock()
-			// ping <- true // Send the first channel ping, which activates the 2nd goroutine
-			// <- ping // Block here until we receive a channel ping from the 2nd goroutine
 		}
 	}()
 
 	go func(){
 		defer wg.Done()
 		for i := range 10{
-			// <- ping // Wait at the start until we receive a channel ping from the 1st goroutine
-			// This receiver at the start of the loop ensures that the Contents goroutine is first
 			mu.Lock()
 			value = 2 * i + 1
 			fmt.Printf("%d ", value)
 			mu.Unlock()
-			// ping <- true // Send the second channel ping, which will allow the 1st goroutine to continue
 		}
 	}()
 
@@ -107,4 +74,36 @@ func ex14() int {
 	fmt.Printf("Value is %d\n", value)
 	
 	return value
+}
+
+func ex15_channel(){
+	fmt.Println("Doing exercise 15 with channels")
+	var wg sync.WaitGroup
+	evenChan := make(chan int)
+	oddChan := make(chan int)
+	wg.Add(2)
+
+	go func(){
+		defer wg.Done()
+		for i := range 10{
+			evenChan <- 2 * i
+		}
+	}()
+
+	go func(){
+		defer wg.Done()
+		for i := range 10{
+			oddChan <- 2 * i + 1
+		}
+	}()
+
+	for range 10{
+		e := <-evenChan
+		fmt.Printf("%d ", e)
+		o := <-oddChan
+		fmt.Printf("%d ", o)
+	}
+
+	wg.Wait()
+	fmt.Println()
 }

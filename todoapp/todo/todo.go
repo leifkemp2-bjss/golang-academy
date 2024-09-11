@@ -81,10 +81,13 @@ const (
 	Completed = "Completed"
 )
 
-type TodoList map[int]Todo
+type TodoList struct {
+	List map[int]Todo
+	MaxSize int
+}
 
 func (t TodoList) ReadInMemory (id int)(Todo, error){
-	todo, err := t[id]
+	todo, err := t.List[id]
 	if !err {
 		return Todo{}, fmt.Errorf("Todo item with id %d not found", id)
 	}
@@ -93,7 +96,7 @@ func (t TodoList) ReadInMemory (id int)(Todo, error){
 
 func (t TodoList) ListInMemory() string{
 	result := ""
-	for _, todo := range t {
+	for _, todo := range t.List {
 		result += fmt.Sprintf("%v\n", todo)
 	}
 	return result
@@ -105,8 +108,8 @@ func (t TodoList) CreateInMemory(contents string, status string)(Todo, error){
 	}
 
 	iters := 0
-	for iters < 1000 {
-		_, ok := t[iters]
+	for iters < t.MaxSize {
+		_, ok := t.List[iters]
 
 		if !ok {
 			// Found an Id that isn't in use
@@ -115,7 +118,7 @@ func (t TodoList) CreateInMemory(contents string, status string)(Todo, error){
 		iters++
 	}
 
-	if iters == 1000 {
+	if iters == t.MaxSize {
 		return Todo{}, fmt.Errorf("could not generate an unused ID for this Todo item")
 	}
 
@@ -132,21 +135,21 @@ func (t TodoList) CreateInMemory(contents string, status string)(Todo, error){
 		todo.Status = status
 	}
 
-	t[iters] = todo
+	t.List[iters] = todo
 
 	return todo, nil
 }
 
 func (t TodoList) UpdateInMemory(id int, contents string, status string)(error){
-	_, ok := t[id]
+	_, ok := t.List[id]
 	if !ok {
 		return fmt.Errorf("item with id %d does not exist", id)
 	}
 
 	todo := Todo{
 		Id: id,
-		Contents: t[id].Contents,
-		Status: t[id].Status,
+		Contents: t.List[id].Contents,
+		Status: t.List[id].Status,
 	}
 
 	if contents != "" {
@@ -159,16 +162,16 @@ func (t TodoList) UpdateInMemory(id int, contents string, status string)(error){
 		todo.Status = status
 	}
 
-	t[id] = todo
+	t.List[id] = todo
 	return nil
 }
 
 func (t TodoList) DeleteInMemory(id int)(error){
-	_, ok := t[id]
+	_, ok := t.List[id]
 	if !ok {
 		return fmt.Errorf("item with id %d does not exist", id)
 	}
-	delete(t, id)
+	delete(t.List, id)
 	return nil
 }
 
@@ -182,14 +185,14 @@ func (t TodoList)ReadTodosFromFileToMemory(dir string)(error){
 	err = json.Unmarshal(f_r, &result)
 	
 	for _, r := range result {
-		t[r.Id] = r
+		t.List[r.Id] = r
 	}
 
 	return err
 }
 
 func (t *TodoList)SaveTodosFromMemoryToFile(dir string)(error){
-	values := slices.Collect(maps.Values(*t))
+	values := slices.Collect(maps.Values(t.List))
 	OutputTodosToJSONFile(dir, values...)
 	return nil
 }

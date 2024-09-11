@@ -44,5 +44,9 @@ func main(){
 
 	ex14()
 
+	ex15_channel()
+
+	ex15_mutex()
+
 	ex16(todoList...)
 }

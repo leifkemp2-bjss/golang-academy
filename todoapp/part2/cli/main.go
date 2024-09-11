@@ -15,6 +15,8 @@ var id int
 var contents string
 var status string
 
+// TODO: explore using spawning processes in order to allow the program to continue running after executing a command - https://gobyexample.com/spawning-processes
+
 func main(){
 	todos, err := InitialiseTodos()
 	if err != nil {
@@ -117,7 +119,11 @@ func main(){
 }
 
 func InitialiseTodos()(todo.TodoList, error){
-	todos := todo.TodoList{}
+	todos := todo.TodoList{
+		List: make(map[int]todo.Todo),
+		MaxSize: 100,
+	}
+
 	err := todos.ReadTodosFromFileToMemory(dir)
 	if err != nil {
 		
@@ -127,14 +133,13 @@ func InitialiseTodos()(todo.TodoList, error){
 
 			if err != nil {
 				fmt.Println(err)
-				return nil, err
+				return todo.TodoList{}, err
 			}
 			defer f.Close()
 			f.Write([]byte(`[]`))
-			todos = map[int]todo.Todo{}
 		} else {
 			fmt.Println(err)
-			return nil, err
+			return todo.TodoList{}, err
 		}
 	}
 	return todos, nil
