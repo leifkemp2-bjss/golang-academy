@@ -42,11 +42,11 @@ func main(){
 
 	fmt.Println(todo.ListTodos(readResult...))
 
-	ex14()
+	ex14(10)
 
-	ex15_channel()
+	ex15_channel(10)
 
-	ex15_mutex()
+	ex15_mutex(10)
 
 	ex16(todoList...)
 }

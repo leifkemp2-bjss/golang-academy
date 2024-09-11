@@ -3,79 +3,92 @@ package main
 import (
 	"fmt"
 	"sync"
+	"time"
 	// "time"
 )
 
 var value = 0
 var mu sync.Mutex
 
-func ex14() int {
+func ex14(n int) string {
+	result := ""
 	var wg sync.WaitGroup
-	fmt.Println("Running exercise 14")
+	// fmt.Println("Running exercise 14")
 
 	// This exercise is designed to simulate a race condition
 	wg.Add(2)
 
 	go func(){
-		for i := 0; i <= 10; i++{
-			if i % 2 == 0 {
-				value = i
-				// fmt.Printf("Setting value to %d\n", value)
-			}
+		for i := range n{
+			value = 2 * i
+			result += fmt.Sprintf("%d", value)
+			time.Sleep(1 * time.Millisecond)
 		}
 
 		wg.Done()
 	}()
 
 	go func(){
-		for i := 0; i <= 10; i++{
-			if i % 2 != 0 {
-				value = i
-				// fmt.Printf("Setting value to %d\n", value)
-			}
+		for i := range n{
+			value = 2 * i + 1
+			result += fmt.Sprintf("%d", value)
+			time.Sleep(1 * time.Millisecond)
 		}
 
 		wg.Done()
 	}()
 
 	wg.Wait()
-	return value
+	return result
 }
 
-func ex15_mutex() int{
-	fmt.Println("Doing exercise 15 with mutexes")
+func ex15_noconcurrency(n int) string{
+	result := ""
+
+	for i := range 2 * n {
+		result += fmt.Sprintf("%d", i)
+		time.Sleep(1 * time.Millisecond)
+	}
+	return result
+}
+
+func ex15_mutex(n int) string{
+	// fmt.Println("Doing exercise 15 with mutexes")
 	var wg sync.WaitGroup
 	wg.Add(2)
 
+	result := ""
+
 	go func(){
 		defer wg.Done()
 
-		for i := range 10{
+		for i := range n{
 			mu.Lock()
 			value = 2 * i
-			fmt.Printf("%d ", value)
+			result += fmt.Sprintf("%d", value)
+			// fmt.Printf("%d ", value)
 			mu.Unlock()
+			time.Sleep(1 * time.Millisecond)
 		}
 	}()
 
 	go func(){
 		defer wg.Done()
-		for i := range 10{
+		for i := range n{
 			mu.Lock()
 			value = 2 * i + 1
-			fmt.Printf("%d ", value)
+			result += fmt.Sprintf("%d", value)
 			mu.Unlock()
+			time.Sleep(1 * time.Millisecond)
 		}
 	}()
 
-	wg.Wait()
-	fmt.Println()
-	
-	return value
+	wg.Wait()	
+	return result
 }
 
-func ex15_channel(){
-	fmt.Println("Doing exercise 15 with channels")
+func ex15_channel(n int)string{
+	// fmt.Println("Doing exercise 15 with channels")
 	var wg sync.WaitGroup
 	wg.Add(2)
 
@@ -83,24 +96,45 @@ func ex15_channel(){
 
 	go func(){
 		defer wg.Done()
-		for i := range 10{
+		for i := range n{
 			numbersChan <- 2 * i
+			time.Sleep(1 * time.Millisecond)
 		}
 	}()
 
 	go func(){
 		defer wg.Done()
-		for i := range 10{
+		for i := range n{
 			numbersChan <- 2 * i + 1
+			time.Sleep(1 * time.Millisecond)
 		}
 	}()
 
-	for range 20{
+	result := ""
+	for range 2 * n{
 		e := <-numbersChan
-		fmt.Printf("%d ", e)
+		result += fmt.Sprintf("%d ", e)
 	}
 
 	wg.Wait()
 	close(numbersChan)
-	fmt.Println()
+	return result
+}
+
+func ex15_manygoroutines(n int) string{
+	numbersChan := make(chan int)
+
+	for i := range 2 * n {
+		go func(i int){
+			numbersChan <- i
+		}(i)
+	}
+
+	result := ""
+	for range 2 * n{
+		e := <-numbersChan
+		result += fmt.Sprintf("%d ", e)
+	}
+
+	return result
 }

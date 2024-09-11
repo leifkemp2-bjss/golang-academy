@@ -184,5 +184,40 @@ func TestUpdateInMemoryInvalid(t *testing.T){
 }
 
 func TestDeleteInMemory(t *testing.T){
+	testTodoList := TodoList{
+		List: map[int]Todo{
+			0: {Id: 0, Contents: "First todo item", Status: Completed},
+			1: {Id: 1, Contents: "Second todo item", Status: InProgress},
+			2: {Id: 2, Contents: "Third todo item", Status: ToDo},
+		},
+		MaxSize: 4,
+	}
 
+	err := testTodoList.DeleteInMemory(0)
+	if err != nil {
+		t.Error("the program encountered an unexpected error")
+	}
+
+	if len(testTodoList.List) != 2{
+		t.Error("the todo list should contain 2 items")
+	}
+}
+
+func TestDeleteInMemoryInvalid(t *testing.T){
+	testTodoList := TodoList{
+		List: map[int]Todo{
+			0: {Id: 0, Contents: "First todo item", Status: Completed},
+			1: {Id: 1, Contents: "Second todo item", Status: InProgress},
+			2: {Id: 2, Contents: "Third todo item", Status: ToDo},
+		},
+		MaxSize: 4,
+	}
+
+	err := testTodoList.DeleteInMemory(5)
+	if err == nil {
+		t.Error("the id does not exist in the todo list")
+	}
+	if err.Error() != "item with id 5 does not exist" {
+		t.Errorf("encountered an unexpected error: %s", err.Error())
+	} 
 }
