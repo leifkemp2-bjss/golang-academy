@@ -126,6 +126,9 @@ func (t TodoList) CreateInMemory(contents string, status string)(Todo, error){
 	}
 
 	if status != "" {
+		if status != ToDo && status != InProgress && status != Completed {
+			return Todo{}, fmt.Errorf("status is not valid, must be one of the following: %s, %s, %s", ToDo, InProgress, Completed)
+		}
 		todo.Status = status
 	}
 
@@ -139,8 +142,6 @@ func (t TodoList) UpdateInMemory(id int, contents string, status string)(error){
 	if !ok {
 		return fmt.Errorf("item with id %d does not exist", id)
 	}
-
-	
 
 	todo := Todo{
 		Id: id,

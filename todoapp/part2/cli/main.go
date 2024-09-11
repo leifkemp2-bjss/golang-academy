@@ -10,29 +10,17 @@ import (
 
 var dir = "../../files/todolist_cli.json"
 
+var command string
+var id int
+var contents string
+var status string
+
 func main(){
-	todos := todo.TodoList{}
-	err := todos.ReadTodosFromFileToMemory(dir)
+	todos, err := InitialiseTodos()
 	if err != nil {
-		
-		if _, ok := err.(*os.PathError); ok{
-			fmt.Println("file does not exist, creating now")
-			f, err := os.Create(dir)
-
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			defer f.Close()
-			f.Write([]byte(`[]`))
-			todos = map[int]todo.Todo{}
-		} else {
-			fmt.Println(err)
-			return
-		}
+		fmt.Println(err)
+		return
 	}
-
-	var command string
 
 	flag.StringVar(&command, "command", "", "Choose a command: help, read, list, create, update, delete")
 
@@ -48,18 +36,23 @@ func main(){
 		command = "delete"
 		return nil
 	})
-	flag.BoolFunc("c", "Creates a todo, contents are required, status is optional", func(s string) error {
+	flag.BoolFunc("a", "Creates a todo, contents are required, status is optional", func(s string) error {
 		command = "create"
 		return nil
 	})
-	flag.BoolFunc("u", "Updates a todo with given ID, provided either status or contents are given", func(s string) error {
+	flag.BoolFunc("u", "Updates a todo with given ID, provided either contents or status are given", func(s string) error {
 		command = "update"
 		return nil
 	})
 
-	id := flag.Int("id", -1, "The ID of the todo")
-	contents := flag.String("contents", "", "The contents of the todo")
-	status := flag.String("status", "", "The status of the todo")
+	flag.IntVar(&id, "id", -1, "The ID of the todo")
+	flag.IntVar(&id, "i", -1, "The ID of the todo (shorthand)")
+
+	flag.StringVar(&contents, "contents", "", "The contents of the todo")
+	flag.StringVar(&contents, "c", "", "The contents of the todo (shorthand)")
+
+	flag.StringVar(&status, "status", "", "The status of the todo")
+	flag.StringVar(&status, "s", "", "The status of the todo (shorthand)")
 
 	flag.Parse()
 
@@ -67,11 +60,11 @@ func main(){
 	case "help":
 		flag.PrintDefaults()
 	case "read":
-		if !IdValid(*id) {
+		if !IdValid(id) {
 			return
 		}
 
-		todo, err := todos.ReadInMemory(*id)
+		todo, err := todos.ReadInMemory(id)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -80,12 +73,12 @@ func main(){
 	case "list":
 		fmt.Print(todos.ListInMemory())
 	case "create":
-		if *contents == "" {
+		if contents == "" {
 			fmt.Println("content field has not been provided")
 			return
 		}
 
-		i, err := todos.CreateInMemory(*contents, *status)
+		i, err := todos.CreateInMemory(contents, status)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -93,34 +86,58 @@ func main(){
 		fmt.Printf("New Todo created! Id: %d\n", i.Id)
 		Save(todos)
 	case "update":
-		if !IdValid(*id) {
+		if !IdValid(id) {
 			return
 		}
-		if *contents == "" && *status == "" {
+		if contents == "" && status == "" {
 			fmt.Println("content and status fields have not been provided, please provide at least one")
 			return
 		}
 
-		err := todos.UpdateInMemory(*id, *contents, *status)
+		err := todos.UpdateInMemory(id, contents, status)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		fmt.Printf("Todo ID %d updated!", *id)
+		fmt.Printf("Todo ID %d updated!", id)
 		Save(todos)
 	case "delete":
-		if !IdValid(*id) {
+		if !IdValid(id) {
 			return
 		}
 
-		err = todos.DeleteInMemory(*id)
+		err := todos.DeleteInMemory(id)
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		fmt.Printf("Todo ID %d deleted!", *id)
+		fmt.Printf("Todo ID %d deleted!", id)
 		Save(todos)
 	}
+}
+
+func InitialiseTodos()(todo.TodoList, error){
+	todos := todo.TodoList{}
+	err := todos.ReadTodosFromFileToMemory(dir)
+	if err != nil {
+		
+		if _, ok := err.(*os.PathError); ok{
+			fmt.Println("file does not exist, creating now")
+			f, err := os.Create(dir)
+
+			if err != nil {
+				fmt.Println(err)
+				return nil, err
+			}
+			defer f.Close()
+			f.Write([]byte(`[]`))
+			todos = map[int]todo.Todo{}
+		} else {
+			fmt.Println(err)
+			return nil, err
+		}
+	}
+	return todos, nil
 }
 
 func Save(todos todo.TodoList){
