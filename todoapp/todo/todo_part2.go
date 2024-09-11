@@ -76,6 +76,10 @@ func (t TodoList) CreateInMemory(contents string, status string)(Todo, error){
 }
 
 func (t TodoList) UpdateInMemory(id int, contents string, status string)(error){
+	if contents == "" && status == "" {
+		return fmt.Errorf("content and status fields have not been provided, please provide at least one")
+	}
+
 	_, ok := t.List[id]
 	if !ok {
 		return fmt.Errorf("item with id %d does not exist", id)

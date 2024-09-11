@@ -3,6 +3,7 @@ package todo
 import (
 	"reflect"
 	"testing"
+	"fmt"
 )
 
 func TestReadInMemory(t *testing.T) {
@@ -82,10 +83,6 @@ func TestCreateInMemory(t *testing.T){
 		t.Errorf("expected %v, got %v", want, got)
 	}
 
-	if len(testTodoList.List) != 4{
-		t.Error("the todo list should contain 4 items")
-	}
-
 	_, err = testTodoList.CreateInMemory("Fifth todo item", "")
 	if err == nil {
 		t.Errorf("the list should be at capacity")
@@ -93,10 +90,83 @@ func TestCreateInMemory(t *testing.T){
 	if err.Error() != "could not generate an unused ID for this Todo item" {
 		t.Errorf("encountered an unexpected error: %s", err.Error())
 	}
+
+	if len(testTodoList.List) != 4{
+		t.Error("the todo list should contain 4 items")
+	}
 }
 
 func TestUpdateInMemory(t *testing.T){
+	testTodoList := TodoList{
+		List: map[int]Todo{
+			0: {Id: 0, Contents: "First todo item", Status: Completed},
+			1: {Id: 1, Contents: "Second todo item", Status: InProgress},
+			2: {Id: 2, Contents: "Third todo item", Status: ToDo},
+		},
+		MaxSize: 4,
+	}
 
+	wants := []Todo{
+		{Id: 0, Contents: "First todo item (updated)", Status: Completed},
+		{Id: 1, Contents: "Second todo item", Status: Completed},
+		{Id: 2, Contents: "Third todo item (update the status)", Status: InProgress},
+	}
+
+	err := testTodoList.UpdateInMemory(0, "First todo item (updated)", "")
+	if err != nil {
+		t.Error("encountered an unexpected error")
+	}
+
+	err = testTodoList.UpdateInMemory(1, "", Completed)
+	if err != nil {
+		t.Error("encountered an unexpected error")
+	}
+
+	err = testTodoList.UpdateInMemory(2, "Third todo item (update the status)", InProgress)
+	if err != nil {
+		t.Error("encountered an unexpected error")
+	}
+
+	for i := range wants{
+		if !reflect.DeepEqual(testTodoList.List[i], wants[i]) {
+			t.Errorf("expected %v, got %v", wants[i], testTodoList.List[i])
+		}
+	}
+}
+
+func TestUpdateInMemoryInvalid(t *testing.T){
+	testTodoList := TodoList{
+		List: map[int]Todo{
+			0: {Id: 0, Contents: "First todo item", Status: Completed},
+			1: {Id: 1, Contents: "Second todo item", Status: InProgress},
+			2: {Id: 2, Contents: "Third todo item", Status: ToDo},
+		},
+		MaxSize: 4,
+	}
+
+	err := testTodoList.UpdateInMemory(5, "Mystery ID item", "")
+	if err == nil {
+		t.Error("this id is not valid")
+	}
+	if err.Error() != "item with id 5 does not exist" {
+		t.Errorf("encountered an unexpected error: %s", err.Error())
+	} 
+
+	err = testTodoList.UpdateInMemory(2, "", "Nonsense Status")
+	if err == nil {
+		t.Error("this status is not valid")
+	}
+	if err.Error() != fmt.Sprintf("status is not valid, must be one of the following: %s, %s, %s", ToDo, InProgress, Completed) {
+		t.Errorf("encountered an unexpected error: %s", err.Error())
+	} 
+
+	err = testTodoList.UpdateInMemory(0, "", "")
+	if err == nil {
+		t.Error("at least one parameter must be filled")
+	}
+	if err.Error() != "content and status fields have not been provided, please provide at least one" {
+		t.Errorf("encountered an unexpected error: %s", err.Error())
+	}
 }
 
 func TestDeleteInMemory(t *testing.T){

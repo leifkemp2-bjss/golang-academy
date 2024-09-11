@@ -91,10 +91,7 @@ func main(){
 		if !IdValid(id) {
 			return
 		}
-		if contents == "" && status == "" {
-			fmt.Println("content and status fields have not been provided, please provide at least one")
-			return
-		}
+		
 
 		err := todos.UpdateInMemory(id, contents, status)
 		if err != nil {
