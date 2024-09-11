@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"sync"
-	// "time"
 
 	"academy.com/todoapp/todo"
 )
@@ -31,12 +30,11 @@ func ex16(todoList ...todo.Todo){
 		}
 	}()
 
-	for _, todo := range todoList {
+	for range todoList {
 		c := <- contentsChan
-		fmt.Println(c)
+		fmt.Printf("%s: ", c)
 		s := <- statusChan
-		fmt.Println(s)
-		fmt.Printf("Todo %d: %s - %s\n", todo.Id, c, s)
+		fmt.Printf("%s\n", s)
 	}
 
 	wg.Wait()

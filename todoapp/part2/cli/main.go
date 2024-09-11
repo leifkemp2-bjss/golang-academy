@@ -75,11 +75,6 @@ func main(){
 	case "list":
 		fmt.Print(todos.ListInMemory())
 	case "create":
-		if contents == "" {
-			fmt.Println("content field has not been provided")
-			return
-		}
-
 		i, err := todos.CreateInMemory(contents, status)
 		if err != nil {
 			fmt.Println(err)
@@ -91,7 +86,6 @@ func main(){
 		if !IdValid(id) {
 			return
 		}
-		
 
 		err := todos.UpdateInMemory(id, contents, status)
 		if err != nil {

@@ -60,11 +60,6 @@ func TestCreateInMemory(t *testing.T){
 	}
 	var err error
 
-	_, err = testTodoList.CreateInMemory("", "")
-	if err == nil {
-		t.Error("empty contents are not accepted when creating a todo item")
-	}
-
 	got, err := testTodoList.CreateInMemory("Third todo item", InProgress)
 	want := Todo{Id: 2, Contents: "Third todo item", Status: InProgress}
 	if err != nil {
@@ -83,16 +78,35 @@ func TestCreateInMemory(t *testing.T){
 		t.Errorf("expected %v, got %v", want, got)
 	}
 
-	_, err = testTodoList.CreateInMemory("Fifth todo item", "")
+	if len(testTodoList.List) != 4{
+		t.Error("the todo list should contain 4 items")
+	}
+}
+
+func TestCreateInMemoryInvalid(t *testing.T){
+	testTodoList := TodoList{
+		List: map[int]Todo{
+			0: {Id: 0, Contents: "First todo item", Status: Completed},
+			1: {Id: 1, Contents: "Second todo item", Status: InProgress},
+		},
+		MaxSize: 2,
+	}
+	var err error
+
+	_, err = testTodoList.CreateInMemory("", "")
+	if err == nil {
+		t.Error("empty contents are not accepted when creating a todo item")
+	}
+	if err.Error() != "contents cannot be empty" {
+		t.Errorf("encountered an unexpected error: %s", err.Error())
+	}
+
+	_, err = testTodoList.CreateInMemory("Third todo item", "")
 	if err == nil {
 		t.Errorf("the list should be at capacity")
 	}
 	if err.Error() != "could not generate an unused ID for this Todo item" {
 		t.Errorf("encountered an unexpected error: %s", err.Error())
-	}
-
-	if len(testTodoList.List) != 4{
-		t.Error("the todo list should contain 4 items")
 	}
 }
 
