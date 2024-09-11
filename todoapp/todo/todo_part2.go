@@ -31,8 +31,8 @@ func (t TodoList) ReadInMemory (id int)(Todo, error){
 
 func (t TodoList) ListInMemory() string{
 	result := ""
-	for _, todo := range t.List {
-		result += fmt.Sprintf("%v\n", todo)
+	for i := range t.List {
+		result += fmt.Sprintf("%v\n", t.List[i])
 	}
 	return result
 }
