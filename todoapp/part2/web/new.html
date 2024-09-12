@@ -1,0 +1,22 @@
+{{ template "header" }}
+<body>
+    <h2>Create a To Do</h2>
+    <form action="/create" method="POST">
+        <div id="forminput">
+            <p>Contents:</p>
+            <input type="text" name="contents">
+        </div>
+        <div id="forminput">
+            <p>Status:</p>
+            <input list="statuses" name="status" placeholder="To Do">
+            <datalist id="statuses">
+                <option value="To Do">
+                <option value="In Progress">
+                <option value="Completed">
+            </datalist>
+        </div>
+        <div>
+            <input type="submit">
+        </div>
+    </form>
+</body>

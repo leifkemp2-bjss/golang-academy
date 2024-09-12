@@ -1,0 +1,21 @@
+{{ template "header" }}
+<body>
+    <h2>{{.Contents}}</h2>
+    <div>
+        <div>
+            <p>
+                This item has ID {{.Id}}
+            </p>
+            <p></p>
+                Status: {{.Status}}
+            </p>
+        </div>
+        <!-- <div>
+            <form action="/read/{{.Id}}">
+                <input type="submit" value="Read" />
+            </form>
+            <a href="" class="button">Read</a>
+        </div> -->
+        <a href="/list">Back to list</a>
+    </div>
+</body>

@@ -1,0 +1,44 @@
+h1 {
+    text-align: center;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h2, h3, h4, p, div {
+    text-align: center;
+}
+
+#headerlinks {
+    width: 100%;
+    text-align: center;
+    padding: 0;
+}
+
+#headerlinks li {
+    display: inline-block;
+    width: auto;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+#forminput p {
+    text-align: left;
+    width: 10%;
+    display: inline-block;
+}
+
+#forminput input {
+    width: 25%;
+    display: inline-block;
+}
+
+#todoitem p {
+    /* align-items: center; */
+    display: inline-block;
+    width: 25%;
+    text-align: left;
+}
+
+#todoitem form {
+    display: inline-block;
+    width: auto;
+}

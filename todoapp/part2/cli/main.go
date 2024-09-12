@@ -117,7 +117,6 @@ func InitialiseTodos()(todo.TodoList, error){
 
 	err := todos.ReadTodosFromFileToMemory(dir)
 	if err != nil {
-		
 		if _, ok := err.(*os.PathError); ok{
 			fmt.Println("file does not exist, creating now")
 			f, err := os.Create(dir)
