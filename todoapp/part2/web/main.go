@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"academy.com/todoapp/todo"
+	"academy.com/todoapp/part2/flash"
 )
 
 var dir = "../../files/todolist_web.json"
@@ -24,7 +25,7 @@ func errorCheck(err error){
 func main(){
 	todos, _ = InitialiseTodos()
 	// errorCheck(err)
-	fmt.Println(todos)
+	// fmt.Println(todos)
 	
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 
@@ -56,18 +57,19 @@ func rootHandler(writer http.ResponseWriter, request *http.Request){
 }
 
 func listTodosHandler(writer http.ResponseWriter, request *http.Request){
-	// template, err := template.ParseFiles("header.html", "main.html")
 	tmpl := template.Must(template.ParseFiles(
 		"list.html",
 		"header.html",
 	))
-	// errorCheck(err)
-	err := tmpl.Execute(writer, todos)
+
+	err := tmpl.Execute(writer, struct{
+		Todos *todo.TodoList
+		Flash string
+	}{todos, ""})
 	errorCheck(err)
 }
 
 func readTodosHandler(writer http.ResponseWriter, request *http.Request){
-	fmt.Printf("Trying to read todo of id %s\n", request.PathValue("id"))
 	id, err := strconv.Atoi(request.PathValue("id"))
 	errorCheck(err)
 	todo, err := todos.ReadInMemory(id)
@@ -77,18 +79,22 @@ func readTodosHandler(writer http.ResponseWriter, request *http.Request){
 		"read.html",
 		"header.html",
 	))
-	// errorCheck(err)
 	err = tmpl.Execute(writer, todo)
 	errorCheck(err)
 }
 
 func newHandler(writer http.ResponseWriter, request *http.Request){
+	flash, err := flash.GetFlash(writer, request, "message")
+	errorCheck(err)
+
 	tmpl := template.Must(template.ParseFiles(
 		"new.html",
 		"header.html",
 	))
 
-	err := tmpl.Execute(writer, nil)
+	err = tmpl.Execute(writer, struct{
+		Flash string
+	}{string(flash)})
 	errorCheck(err)
 }
 
@@ -97,9 +103,10 @@ func createHandler(writer http.ResponseWriter, request *http.Request){
 	status := request.FormValue("status")
 
 	_, err := todos.CreateInMemory(contents, status)
-	// errorCheck(err)
 	if err != nil{
-		
+		flash.SetFlash(writer, "message", []byte(err.Error()))
+		http.Redirect(writer, request, "/new", http.StatusFound)
+		return
 	}
 
 	Save(*todos)
@@ -108,9 +115,12 @@ func createHandler(writer http.ResponseWriter, request *http.Request){
 }
 
 func updateHandler(writer http.ResponseWriter, request *http.Request){
+	flash, err := flash.GetFlash(writer, request, "message")
+	errorCheck(err)
+
 	id, err := strconv.Atoi(request.PathValue("id"))
 	errorCheck(err)
-	todo, err := todos.ReadInMemory(id)
+	t, err := todos.ReadInMemory(id)
 	errorCheck(err)
 	
 	tmpl := template.Must(template.ParseFiles(
@@ -118,7 +128,11 @@ func updateHandler(writer http.ResponseWriter, request *http.Request){
 		"header.html",
 	))
 
-	err = tmpl.Execute(writer, todo)
+	err = tmpl.Execute(writer, struct{
+		Todo todo.Todo
+		Flash string
+	}{t, string(flash)})
+
 	errorCheck(err)
 }
 
@@ -129,8 +143,12 @@ func updateTodoHandler(writer http.ResponseWriter, request *http.Request){
 	id, err := strconv.Atoi(request.PathValue("id"))
 	errorCheck(err)
 
-	err = todos.UpdateInMemory(id, contents, status)
-	errorCheck(err)
+	_, err = todos.UpdateInMemory(id, contents, status)
+	if err != nil{
+		flash.SetFlash(writer, "message", []byte(err.Error()))
+		http.Redirect(writer, request, fmt.Sprintf("/update/%d", id), http.StatusFound)
+		return
+	}
 
 	Save(*todos)
 
@@ -152,7 +170,7 @@ func deleteHandler(writer http.ResponseWriter, request *http.Request){
 func InitialiseTodos()(*todo.TodoList, error){
 	todos := todo.TodoList{
 		List: make(map[int]todo.Todo),
-		MaxSize: 100,
+		MaxSize: 10,
 	}
 
 	err := todos.ReadTodosFromFileToMemory(dir)

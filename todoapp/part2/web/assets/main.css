@@ -29,6 +29,7 @@ h2, h3, h4, p, div {
 #forminput input {
     width: 25%;
     display: inline-block;
+    height:3%
 }
 
 #todoitem p {

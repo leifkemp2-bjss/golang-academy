@@ -1,11 +1,14 @@
 {{ template "header" }}
 <body>
+    {{if .Flash}}
+    <div><h2 style="color: red;">Error: {{.Flash}}</h2></div>
+    {{end}}
     <h2>To Do List</h2>
     <div>
-        There are {{len .List}} To Do items
+        There are {{len .Todos.List}} To Do items
     </div>
     <div>
-        {{range .List}}
+        {{range .Todos.List}}
         <div id = "todoitem">
             <p>
                 {{.}}
@@ -22,4 +25,5 @@
         </div>
         {{end}}
     </div>
+    <h3>List capacity: {{len .Todos.List}}/{{.Todos.MaxSize}}</h3>
 </body>

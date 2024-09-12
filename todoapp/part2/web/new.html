@@ -8,15 +8,18 @@
         </div>
         <div id="forminput">
             <p>Status:</p>
-            <input list="statuses" name="status" placeholder="To Do">
-            <datalist id="statuses">
-                <option value="To Do">
-                <option value="In Progress">
-                <option value="Completed">
-            </datalist>
+            <!-- <input list="statuses" name="status" placeholder="To Do"> -->
+            <select name="status" value="To Do" placeholder="To Do" style="width: 25%; height:3%">
+                <option value="To Do">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+            </select>
         </div>
         <div>
             <input type="submit">
         </div>
     </form>
+    {{if .Flash}}
+    <div><h2 style="color: red;">Error: {{.Flash}}</h2></div>
+    {{end}}
 </body>

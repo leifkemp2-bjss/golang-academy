@@ -75,14 +75,14 @@ func (t TodoList) CreateInMemory(contents string, status string)(Todo, error){
 	return todo, nil
 }
 
-func (t TodoList) UpdateInMemory(id int, contents string, status string)(error){
+func (t TodoList) UpdateInMemory(id int, contents string, status string)(Todo, error){
 	if contents == "" && status == "" {
-		return fmt.Errorf("content and status fields have not been provided, please provide at least one")
+		return Todo{}, fmt.Errorf("content and status fields have not been provided")
 	}
 
 	_, ok := t.List[id]
 	if !ok {
-		return fmt.Errorf("item with id %d does not exist", id)
+		return Todo{}, fmt.Errorf("item with id %d does not exist", id)
 	}
 
 	todo := Todo{
@@ -96,13 +96,13 @@ func (t TodoList) UpdateInMemory(id int, contents string, status string)(error){
 	}
 	if status != "" {
 		if status != ToDo && status != InProgress && status != Completed {
-			return fmt.Errorf("status is not valid, must be one of the following: %s, %s, %s", ToDo, InProgress, Completed)
+			return Todo{}, fmt.Errorf("status is not valid, must be one of the following: %s, %s, %s", ToDo, InProgress, Completed)
 		}
 		todo.Status = status
 	}
 
 	t.List[id] = todo
-	return nil
+	return t.List[id], nil
 }
 
 func (t TodoList) DeleteInMemory(id int)(error){

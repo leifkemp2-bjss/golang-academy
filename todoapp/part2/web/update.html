@@ -1,22 +1,25 @@
 {{ template "header" }}
 <body>
-    <h2>Create a To Do</h2>
-    <form action="/update_todo/{{.Id}}" method="PUT">
+    <h2>Updating To Do {{.Todo.Id}}</h2>
+    <form action="/update_todo/{{.Todo.Id}}" method="POST">
         <div id="forminput">
             <p>Contents:</p>
-            <input type="text" name="contents" placeholder="{{.Contents}}">
+            <input type="text" name="contents" value="{{.Todo.Contents}}" placeholder="{{.Todo.Contents}}">
         </div>
         <div id="forminput">
             <p>Status:</p>
-            <input list="statuses" name="status" placeholder="{{.Status}}">
-            <datalist id="statuses">
-                <option value="To Do">
-                <option value="In Progress">
-                <option value="Completed">
-            </datalist>
+            <!-- <input list="statuses" name="status" value="{{.Todo.Status}}" placeholder="{{.Todo.Status}}"> -->
+            <select name="status" value="{{.Todo.Status}}" placeholder="{{.Todo.Status}}" style="width: 25%; height:3%">
+                <option value="To Do">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+            </select>
         </div>
         <div>
             <input type="submit">
         </div>
     </form>
+    {{if .Flash}}
+    <div><h2 style="color: red;">Error: {{.Flash}}</h2></div>
+    {{end}}
 </body>

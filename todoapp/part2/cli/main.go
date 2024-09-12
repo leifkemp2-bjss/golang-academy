@@ -87,7 +87,7 @@ func main(){
 			return
 		}
 
-		err := todos.UpdateInMemory(id, contents, status)
+		_, err := todos.UpdateInMemory(id, contents, status)
 		if err != nil {
 			fmt.Println(err)
 			return

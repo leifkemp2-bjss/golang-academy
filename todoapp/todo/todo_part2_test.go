@@ -126,17 +126,17 @@ func TestUpdateInMemory(t *testing.T){
 		{Id: 2, Contents: "Third todo item (update the status)", Status: InProgress},
 	}
 
-	err := testTodoList.UpdateInMemory(0, "First todo item (updated)", "")
+	_, err := testTodoList.UpdateInMemory(0, "First todo item (updated)", "")
 	if err != nil {
 		t.Error("encountered an unexpected error")
 	}
 
-	err = testTodoList.UpdateInMemory(1, "", Completed)
+	_, err = testTodoList.UpdateInMemory(1, "", Completed)
 	if err != nil {
 		t.Error("encountered an unexpected error")
 	}
 
-	err = testTodoList.UpdateInMemory(2, "Third todo item (update the status)", InProgress)
+	_, err = testTodoList.UpdateInMemory(2, "Third todo item (update the status)", InProgress)
 	if err != nil {
 		t.Error("encountered an unexpected error")
 	}
@@ -158,7 +158,7 @@ func TestUpdateInMemoryInvalid(t *testing.T){
 		MaxSize: 4,
 	}
 
-	err := testTodoList.UpdateInMemory(5, "Mystery ID item", "")
+	_, err := testTodoList.UpdateInMemory(5, "Mystery ID item", "")
 	if err == nil {
 		t.Error("this id is not valid")
 	}
@@ -166,7 +166,7 @@ func TestUpdateInMemoryInvalid(t *testing.T){
 		t.Errorf("encountered an unexpected error: %s", err.Error())
 	} 
 
-	err = testTodoList.UpdateInMemory(2, "", "Nonsense Status")
+	_, err = testTodoList.UpdateInMemory(2, "", "Nonsense Status")
 	if err == nil {
 		t.Error("this status is not valid")
 	}
@@ -174,7 +174,7 @@ func TestUpdateInMemoryInvalid(t *testing.T){
 		t.Errorf("encountered an unexpected error: %s", err.Error())
 	} 
 
-	err = testTodoList.UpdateInMemory(0, "", "")
+	_, err = testTodoList.UpdateInMemory(0, "", "")
 	if err == nil {
 		t.Error("at least one parameter must be filled")
 	}
