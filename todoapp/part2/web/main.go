@@ -42,15 +42,10 @@ func main(){
 	errorCheck(err)
 }
 
-// func write(writer http.ResponseWriter, message string){
-// 	_, err := writer.Write([]byte(message))	
-// 	errorCheck(err)
-// }
-
 func rootHandler(writer http.ResponseWriter, request *http.Request){
 	tmpl := template.Must(template.ParseFiles(
-		"main.html",
-		"header.html",
+		"html/main.html",
+		"html/header.html",
 	))
 	err := tmpl.Execute(writer, nil)
 	errorCheck(err)
@@ -58,8 +53,8 @@ func rootHandler(writer http.ResponseWriter, request *http.Request){
 
 func listTodosHandler(writer http.ResponseWriter, request *http.Request){
 	tmpl := template.Must(template.ParseFiles(
-		"list.html",
-		"header.html",
+		"html/list.html",
+		"html/header.html",
 	))
 
 	err := tmpl.Execute(writer, struct{
@@ -76,8 +71,8 @@ func readTodosHandler(writer http.ResponseWriter, request *http.Request){
 	errorCheck(err)
 
 	tmpl := template.Must(template.ParseFiles(
-		"read.html",
-		"header.html",
+		"html/read.html",
+		"html/header.html",
 	))
 	err = tmpl.Execute(writer, todo)
 	errorCheck(err)
@@ -88,8 +83,8 @@ func newHandler(writer http.ResponseWriter, request *http.Request){
 	errorCheck(err)
 
 	tmpl := template.Must(template.ParseFiles(
-		"new.html",
-		"header.html",
+		"html/new.html",
+		"html/header.html",
 	))
 
 	err = tmpl.Execute(writer, struct{
@@ -124,8 +119,8 @@ func updateHandler(writer http.ResponseWriter, request *http.Request){
 	errorCheck(err)
 	
 	tmpl := template.Must(template.ParseFiles(
-		"update.html",
-		"header.html",
+		"html/update.html",
+		"html/header.html",
 	))
 
 	err = tmpl.Execute(writer, struct{
