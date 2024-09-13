@@ -1,11 +1,12 @@
 package todo
 
-import(
-	"fmt"
-	"os"
-	"maps"
-	"slices"
+import (
 	"encoding/json"
+	"fmt"
+	"maps"
+	"os"
+	"slices"
+	"strings"
 )
 
 // Part 2 Functions
@@ -35,6 +36,36 @@ func (t TodoList) ListInMemory() string{
 		result += fmt.Sprintf("%v\n", t.List[i])
 	}
 	return result
+}
+
+func (t TodoList) SearchInMemoryByFilter(contents string, status string)(ret []Todo){
+	vals := slices.Collect(maps.Values(t.List))
+	for _, v := range vals {
+		if strings.Contains(v.Contents, contents) && strings.Contains(v.Status, status) {
+			ret = append(ret, v)
+		}
+	}
+	return ret
+}
+
+func (t TodoList) SearchInMemoryByContents(contents string)(ret []Todo){
+	vals := slices.Collect(maps.Values(t.List))
+	for _, v := range vals {
+		if strings.Contains(v.Contents, contents) {
+			ret = append(ret, v)
+		}
+	}
+	return ret
+}
+
+func (t TodoList) SearchInMemoryByStatus(status string)(ret []Todo){
+	vals := slices.Collect(maps.Values(t.List))
+	for _, v := range vals {
+		if strings.Contains(v.Status, status) {
+			ret = append(ret, v)
+		}
+	}
+	return ret
 }
 
 func (t TodoList) CreateInMemory(contents string, status string)(Todo, error){

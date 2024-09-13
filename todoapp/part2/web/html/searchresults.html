@@ -1,0 +1,25 @@
+{{ template "header" }}
+<body>
+    <h2>Searching for To Dos with matching filter</h2>
+    <div>
+        There are {{len .Todos}} To Do items that match this search
+    </div>
+    <div>
+        {{range .Todos}}
+        <div id = "todoitem">
+            <p>
+                {{.}}
+            </p>
+            <form action="/read/{{.Id}}">
+                <input type="submit" value="Read"/>
+            </form>
+            <form action="/update/{{.Id}}">
+                <input type="submit" value="Update"/>
+            </form>
+            <form action="/delete/{{.Id}}" method="DELETE">
+                <input type="submit" value="Delete"/>
+            </form>
+        </div>
+        {{end}}
+    </div>
+</body>

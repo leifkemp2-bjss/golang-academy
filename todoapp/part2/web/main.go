@@ -31,6 +31,9 @@ func main(){
 
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/list", listTodosHandler)
+	http.HandleFunc("/search/full/{contents}/{status}", searchTodosByFilterHandler)
+	http.HandleFunc("/search/contents/{contents}", searchTodosByContentsHandler)
+	http.HandleFunc("/search/status/{status}", searchTodosByStatusHandler)
 	http.HandleFunc("/read/{id}", readTodosHandler)
 	http.HandleFunc("/new", newHandler)
 	http.HandleFunc("/update/{id}", updateHandler)
@@ -61,6 +64,51 @@ func listTodosHandler(writer http.ResponseWriter, request *http.Request){
 		Todos *todo.TodoList
 		Flash string
 	}{todos, ""})
+	errorCheck(err)
+}
+
+func searchTodosByFilterHandler(writer http.ResponseWriter, request *http.Request){
+	tmpl := template.Must(template.ParseFiles(
+		"html/searchresults.html",
+		"html/header.html",
+	))
+
+	todosSearched := todos.SearchInMemoryByFilter(request.PathValue("contents"), request.PathValue("status"))
+
+	err := tmpl.Execute(writer, struct{
+		Field string
+		Todos []todo.Todo
+	}{request.PathValue("contents"), todosSearched})
+	errorCheck(err)
+}
+
+func searchTodosByContentsHandler(writer http.ResponseWriter, request *http.Request){
+	tmpl := template.Must(template.ParseFiles(
+		"html/searchresults.html",
+		"html/header.html",
+	))
+
+	todosSearched := todos.SearchInMemoryByContents(request.PathValue("contents"))
+
+	err := tmpl.Execute(writer, struct{
+		Field string
+		Todos []todo.Todo
+	}{request.PathValue("contents"), todosSearched})
+	errorCheck(err)
+}
+
+func searchTodosByStatusHandler(writer http.ResponseWriter, request *http.Request){
+	tmpl := template.Must(template.ParseFiles(
+		"html/searchresults.html",
+		"html/header.html",
+	))
+
+	todosSearched := todos.SearchInMemoryByStatus(request.PathValue("status"))
+
+	err := tmpl.Execute(writer, struct{
+		Field string
+		Todos []todo.Todo
+	}{request.PathValue("status"), todosSearched})
 	errorCheck(err)
 }
 
