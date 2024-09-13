@@ -7,34 +7,47 @@ import (
 	"strings"
 )
 
+var inputChan chan int
+var outputChan chan int
+var sum int
 func assignment5() {
-	singleDigitSum := sumNumbers(1)
-	doubleDigitSum := sumNumbers(2)
-	tripleDigitSum := sumNumbers(3)
-
-	pf("Sum of single digit numbers: %d\n", strconv.Itoa(singleDigitSum))
-	pf("Sum of double digit numbers: %d\n", strconv.Itoa(doubleDigitSum))
-	pf("Sum of triple digit numbers: %d\n", strconv.Itoa(tripleDigitSum))
-	pf("Total: ", strconv.Itoa(singleDigitSum+doubleDigitSum+tripleDigitSum))
+	sum = 0
+	inputChan = make(chan int)
+	outputChan = make(chan int)
+	go produceSum(9)
+	listenForInputs(3, 1)
+	listenForInputs(3, 2)
+	listenForInputs(3, 3)
+	
+	sum=<-outputChan
+	pl(sum)
 }
 
-func sumNumbers(digits int) (sum int) {
-	sum = 0
-	count := 0
+func produceSum(calls int)int{
+	sum := 0
+	for range calls{
+		val := <- inputChan
+		sum += val
+	}
+	outputChan <- sum
+	return sum
+}
+
+func listenForInputs(i int, digits int){
 	reader := bufio.NewReader(os.Stdin)
-
-	for count < 3 {
-		pf("Please enter a %d digit number.\n", digits)
+	count := 0
+	for count < i {
+		pf("Please enter a %d digit number: \n", digits)
 		input, err := reader.ReadString('\n')
-
+		
 		if err != nil {
 			pl("This is not a valid input.")
 			continue
 		} else {
 			inputTrimmed := strings.TrimSpace(input)
-			num, err2 := strconv.Atoi(inputTrimmed)
+			num, err := strconv.Atoi(inputTrimmed)
 			
-			if err2 != nil {
+			if err != nil {
 				pl("This input is not an integer.")
 				continue
 			} else {
@@ -42,12 +55,10 @@ func sumNumbers(digits int) (sum int) {
 					pf("This input is not a %d digit number.\n", digits)
 					continue
 				} else {
-					sum += num
+					inputChan <- num
 					count++
 				}
 			}
 		}
-	}
-
-	return
+	} 
 }
