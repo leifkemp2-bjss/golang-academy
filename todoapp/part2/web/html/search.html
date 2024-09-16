@@ -1,0 +1,25 @@
+{{ template "header" }}
+<body>
+    <h2>Search for To Dos</h2>
+    <form name="myform" action="/search/results">
+        <div id="forminput">
+            <p>Contents:</p>
+            <input type="text" name="contents" value="" placeholder="">
+        </div>
+        <div id="forminput">
+            <p>Status:</p>
+            <select name="status" value="" placeholder="" style="width: 25%; height:3%">
+                <option value=""></option>
+                <option value="To Do">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+            </select>
+        </div>
+        <div>
+            <input type="submit" value="Search">
+        </div>
+    </form>
+    {{if .Flash}}
+    <div><h2 style="color: red;">Error: {{.Flash}}</h2></div>
+    {{end}}
+</body>

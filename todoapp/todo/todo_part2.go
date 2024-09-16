@@ -7,6 +7,7 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"sort"
 )
 
 // Part 2 Functions
@@ -38,34 +39,22 @@ func (t TodoList) ListInMemory() string{
 	return result
 }
 
-func (t TodoList) SearchInMemoryByFilter(contents string, status string)(ret []Todo){
+func (t TodoList) SearchInMemory(contents string, status string)(ret []Todo, err error){
+	if contents == "" && status == "" {
+		return nil, fmt.Errorf("contents and status have not been provided, please provide at least one")
+	}
 	vals := slices.Collect(maps.Values(t.List))
 	for _, v := range vals {
-		if strings.Contains(v.Contents, contents) && strings.Contains(v.Status, status) {
+		if (strings.Contains(v.Contents, contents) || contents == "") && (strings.Contains(v.Status, status) || status == "") {
 			ret = append(ret, v)
 		}
 	}
-	return ret
-}
 
-func (t TodoList) SearchInMemoryByContents(contents string)(ret []Todo){
-	vals := slices.Collect(maps.Values(t.List))
-	for _, v := range vals {
-		if strings.Contains(v.Contents, contents) {
-			ret = append(ret, v)
-		}
-	}
-	return ret
-}
+	sort.Slice(ret, func(i, j int) bool {
+		return ret[i].Id < ret[j].Id
+	})
 
-func (t TodoList) SearchInMemoryByStatus(status string)(ret []Todo){
-	vals := slices.Collect(maps.Values(t.List))
-	for _, v := range vals {
-		if strings.Contains(v.Status, status) {
-			ret = append(ret, v)
-		}
-	}
-	return ret
+	return ret, nil
 }
 
 func (t TodoList) CreateInMemory(contents string, status string)(Todo, error){

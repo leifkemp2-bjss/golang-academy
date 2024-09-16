@@ -8,9 +8,10 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
-	"academy.com/todoapp/todo"
 	"academy.com/todoapp/part2/flash"
+	"academy.com/todoapp/todo"
 )
 
 var dir = "../../files/todolist_web.json"
@@ -24,16 +25,13 @@ func errorCheck(err error){
 
 func main(){
 	todos, _ = InitialiseTodos()
-	// errorCheck(err)
-	// fmt.Println(todos)
 	
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/list", listTodosHandler)
-	http.HandleFunc("/search/full/{contents}/{status}", searchTodosByFilterHandler)
-	http.HandleFunc("/search/contents/{contents}", searchTodosByContentsHandler)
-	http.HandleFunc("/search/status/{status}", searchTodosByStatusHandler)
+	http.HandleFunc("/search/results", searchTodosHandler)
+	http.HandleFunc("/search", searchHandler)
 	http.HandleFunc("/read/{id}", readTodosHandler)
 	http.HandleFunc("/new", newHandler)
 	http.HandleFunc("/update/{id}", updateHandler)
@@ -67,48 +65,44 @@ func listTodosHandler(writer http.ResponseWriter, request *http.Request){
 	errorCheck(err)
 }
 
-func searchTodosByFilterHandler(writer http.ResponseWriter, request *http.Request){
+func searchHandler(writer http.ResponseWriter, request *http.Request){
+	flash, err := flash.GetFlash(writer, request, "message")
+	errorCheck(err)
+
 	tmpl := template.Must(template.ParseFiles(
-		"html/searchresults.html",
+		"html/search.html",
 		"html/header.html",
 	))
 
-	todosSearched := todos.SearchInMemoryByFilter(request.PathValue("contents"), request.PathValue("status"))
-
-	err := tmpl.Execute(writer, struct{
-		Field string
-		Todos []todo.Todo
-	}{request.PathValue("contents"), todosSearched})
+	err = tmpl.Execute(writer, struct{
+		Flash string
+	}{string(flash)})
 	errorCheck(err)
 }
 
-func searchTodosByContentsHandler(writer http.ResponseWriter, request *http.Request){
+func searchTodosHandler(writer http.ResponseWriter, request *http.Request){
+	contents := request.FormValue("contents")
+	contents = strings.TrimSpace(contents)
+	status := request.FormValue("status")
+	status = strings.TrimSpace(status)
+	
 	tmpl := template.Must(template.ParseFiles(
 		"html/searchresults.html",
 		"html/header.html",
 	))
 
-	todosSearched := todos.SearchInMemoryByContents(request.PathValue("contents"))
+	
+	todosSearched, err := todos.SearchInMemory(contents, status)
+	if err != nil{
+		flash.SetFlash(writer, "message", []byte(err.Error()))
+		http.Redirect(writer, request, "/search", http.StatusFound)
+		return
+	}
 
-	err := tmpl.Execute(writer, struct{
+	err = tmpl.Execute(writer, struct{
 		Field string
 		Todos []todo.Todo
 	}{request.PathValue("contents"), todosSearched})
-	errorCheck(err)
-}
-
-func searchTodosByStatusHandler(writer http.ResponseWriter, request *http.Request){
-	tmpl := template.Must(template.ParseFiles(
-		"html/searchresults.html",
-		"html/header.html",
-	))
-
-	todosSearched := todos.SearchInMemoryByStatus(request.PathValue("status"))
-
-	err := tmpl.Execute(writer, struct{
-		Field string
-		Todos []todo.Todo
-	}{request.PathValue("status"), todosSearched})
 	errorCheck(err)
 }
 
