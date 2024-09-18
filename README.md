@@ -1,7 +1,6 @@
 # Leif's Go Academy Work
 This is my attempt at the BJSS Go Academy, based on the Kepler version of the exercise.
-There are 4 different sections:
-- Hello Go, this is just a quick Hello World script I wrote as my first code in Go.
+There are 3 different sections:
 - Assignments, this is where assignments 1 to 10 can be found
 - To Do App, this is the To Do application, with the CLI and Web App
 - Thread Safe Test, this is a test at writing a server that could concurrently handle requests in a thread safe manner
