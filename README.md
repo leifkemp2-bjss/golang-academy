@@ -35,6 +35,10 @@ To run the webapp, run the part2.exe file in the todoapp/part2/web folder, the a
 ## File Storage
 Some programs in this repository create files that are stored in either assignments/files, or todoapp/files.
 
+## Future Plans
+If I get the time to work on this repository after the academy finishes, I'd like to implement an SQL database of some form, though I'm currently unsure how to do so.
+I would also like to explore more black box testing, which I attempted with the first version of the thread safe test code, but it was a struggle to get it to work properly.
+
 ## Credits
 Alex Edwards - Simple Flash Messages in Golang
 https://www.alexedwards.net/blog/simple-flash-messages-in-golang
