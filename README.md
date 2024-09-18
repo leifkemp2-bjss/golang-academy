@@ -1,8 +1,10 @@
 # Leif's Go Academy Work
-This is my attempt at the BJSS Go Academy, it is split into 3 different sections:
+This is my attempt at the BJSS Go Academy, based on the Kepler version of the exercise.
+There are 4 different sections:
 - Hello Go, this is just a quick Hello World script I wrote as my first code in Go.
 - Assignments, this is where assignments 1 to 10 can be found
 - To Do App, this is the To Do application, with the CLI and Web App
+- Thread Safe Test, this is a test at writing a server that could concurrently handle requests in a thread safe manner
 
 ## Running each application
 ### Assignments
@@ -21,6 +23,8 @@ To run the CLI, run cli.exe in the todoapp/part2/cli folder using this list of c
 - a - Creates a To Do, contents are required, status is optional
 - d - Deletes a To Do by ID
 - u - Updates a To Do with given ID, provided either contents or status are given
+### Thread Safe Test
+Run the threadsafetest.exe file in the threadsafetest folder, the API can then be called using CURL or postman at <b>localhost:8000</b>
 
 ##### Parameters
 - contents / c - The contents parameter

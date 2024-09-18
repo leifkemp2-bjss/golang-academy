@@ -1,13 +1,8 @@
 package main
 
 import (
-	// "context"
 	"fmt"
 	"net/http"
-	// "sync"
-	// "log"
-
-	// req "academy.com/threadsafetest/requestqueue"
 )
 
 // var rq req.RequestQueue
@@ -23,11 +18,7 @@ type apiRequest struct{
 func main(){
 	requestChan = make(chan apiRequest)
 	fmt.Println("Started running :)")
-	// rq = req.RequestQueue{
-	// 	Chan: make(chan *http.Request),
-	// }
 
-	// http.HandleFunc("/", rootHandler)
 	fmt.Println("Running web app...")
 	go queueHandler()
 
