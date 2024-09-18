@@ -13,7 +13,8 @@ import (
 // var rq req.RequestQueue
 var requestChan chan apiRequest
 
-// credit to https://github.com/labiraus/go-kvstore/blob/main/api.go for the apiRequest struct for thread safe server stuffs
+// credit to https://github.com/labiraus/go-kvstore/blob/main/api.go for inspiration for
+// the apiRequest struct for thread safe server stuffs
 type apiRequest struct{
 	verb string
 	response chan<- []byte // this is a write only channel

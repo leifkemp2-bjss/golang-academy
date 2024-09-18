@@ -35,3 +35,6 @@ Some programs in this repository create files that are stored in either assignme
 ## Credits
 Alex Edwards - Simple Flash Messages in Golang
 https://www.alexedwards.net/blog/simple-flash-messages-in-golang
+
+Oli Hathaway - KV Store in Golang
+https://github.com/labiraus/go-kvstore
