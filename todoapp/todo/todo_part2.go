@@ -31,7 +31,7 @@ func (t TodoList) ReadInMemory (id int)(Todo, error){
 	return todo, nil
 }
 
-func (t TodoList) ListInMemory() string{
+func (t *TodoList) ListInMemory() string{
 	result := ""
 	for i := range t.List {
 		result += fmt.Sprintf("%v\n", t.List[i])
@@ -39,7 +39,7 @@ func (t TodoList) ListInMemory() string{
 	return result
 }
 
-func (t TodoList) SearchInMemory(contents string, status string)(ret []Todo, err error){
+func (t *TodoList) SearchInMemory(contents string, status string)(ret []Todo, err error){
 	if contents == "" && status == "" {
 		return nil, fmt.Errorf("contents and status have not been provided, please provide at least one")
 	}
@@ -57,7 +57,7 @@ func (t TodoList) SearchInMemory(contents string, status string)(ret []Todo, err
 	return ret, nil
 }
 
-func (t TodoList) CreateInMemory(contents string, status string)(Todo, error){
+func (t *TodoList) CreateInMemory(contents string, status string)(Todo, error){
 	if contents == "" {
 		return Todo{}, fmt.Errorf("contents cannot be empty")
 	}
@@ -95,7 +95,7 @@ func (t TodoList) CreateInMemory(contents string, status string)(Todo, error){
 	return todo, nil
 }
 
-func (t TodoList) UpdateInMemory(id int, contents string, status string)(Todo, error){
+func (t *TodoList) UpdateInMemory(id int, contents string, status string)(Todo, error){
 	if contents == "" && status == "" {
 		return Todo{}, fmt.Errorf("content and status fields have not been provided")
 	}
@@ -125,7 +125,7 @@ func (t TodoList) UpdateInMemory(id int, contents string, status string)(Todo, e
 	return t.List[id], nil
 }
 
-func (t TodoList) DeleteInMemory(id int)(error){
+func (t *TodoList) DeleteInMemory(id int)(error){
 	_, ok := t.List[id]
 	if !ok {
 		return fmt.Errorf("item with id %d does not exist", id)
@@ -134,7 +134,7 @@ func (t TodoList) DeleteInMemory(id int)(error){
 	return nil
 }
 
-func (t TodoList)ReadTodosFromFileToMemory(dir string)(error){
+func (t *TodoList)ReadTodosFromFileToMemory(dir string)(error){
 	f_r, err := os.ReadFile(dir)
 	if err != nil {
 		return err
