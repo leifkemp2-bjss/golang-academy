@@ -37,6 +37,8 @@ To run the database, Docker is required.
 
 To run the webapp utilising a PostgreSQL database, run ```docker compose up -d``` on the docker-compose.yml file. Then run the part2.exe file with the ```-db``` flag to tell the application to use the database.
 
+To tear down the container after finishing with the program, use ```docker compose down -v``` to also remove the volumes the container creates.
+
 ## File Storage
 Some programs in this repository create files that are stored in either assignments/files, or todoapp/files.
 
