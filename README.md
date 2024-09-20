@@ -2,7 +2,7 @@
 This is my attempt at the BJSS Go Academy, based on the Kepler version of the exercise.
 There are 3 different sections:
 - Assignments, this is where assignments 1 to 10 can be found
-- To Do App, this is the To Do application, with the CLI and Web App
+- To Do App, this is the To Do application, split into the CLI and the Web App. The Web App can function with either In Memory Storage, or use a PostgreSQL docker container.
 - Thread Safe Test, this is a test at writing a server that could concurrently handle requests in a thread safe manner
 
 ## Running each application
@@ -30,7 +30,12 @@ Run the threadsafetest.exe file in the threadsafetest folder, the API can then b
 - status / s - The status parameter
 - id / i - The ID parameter
 #### Web App
+##### In Memory Storage
 To run the webapp, run the part2.exe file in the todoapp/part2/web folder, the app can then be accessed from <b>localhost:8080</b>
+##### PostgreSQL Storage
+To run the database, Docker is required.
+
+To run the webapp utilising a PostgreSQL database, run ```docker compose up -d``` on the docker-compose.yml file. Then run the part2.exe file with the ```-db``` flag to tell the application to use the database.
 
 ## File Storage
 Some programs in this repository create files that are stored in either assignments/files, or todoapp/files.
@@ -45,3 +50,6 @@ https://www.alexedwards.net/blog/simple-flash-messages-in-golang
 
 Oli Hathaway - KV Store in Golang
 https://github.com/labiraus/go-kvstore
+
+BugBytes - Go - SQL Databases in Golang with the database/sql package
+https://www.youtube.com/watch?v=Y7a0sNKdoQk

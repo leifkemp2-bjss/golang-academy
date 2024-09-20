@@ -45,7 +45,7 @@ func (t *TodoList) SearchInMemory(contents string, status string)(ret []Todo, er
 	}
 	vals := slices.Collect(maps.Values(t.List))
 	for _, v := range vals {
-		if (strings.Contains(v.Contents, contents) || contents == "") && (strings.Contains(v.Status, status) || status == "") {
+		if (strings.Contains(strings.ToLower(v.Contents), strings.ToLower(contents)) || contents == "") && (strings.Contains(v.Status, status) || status == "") {
 			ret = append(ret, v)
 		}
 	}

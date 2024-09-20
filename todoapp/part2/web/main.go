@@ -9,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"flag"
 
 	"academy.com/todoapp/part2/flash"
 	"academy.com/todoapp/todo"
@@ -17,6 +18,7 @@ import (
 
 var dir = "../../files/todolist_web.json"
 var todos *todo.TodoList
+var useDatabase bool
 
 func errorCheck(err error){
 	if err != nil {
@@ -25,8 +27,19 @@ func errorCheck(err error){
 }
 
 func main(){
-	database.DB = database.Connect()
-	todos, _ = InitialiseTodos()
+	flag.BoolFunc("db", "Uses the PostgreSQL database instead of the json files", func(s string) error {
+		useDatabase = true
+		return nil
+	})
+
+	flag.Parse()
+
+	if useDatabase {
+		database.DB = database.Connect()
+		database.CreateTodosTable(database.DB)
+	} else {
+		todos, _ = InitialiseTodos()
+	}
 	
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
 
@@ -59,11 +72,20 @@ func listTodosHandler(writer http.ResponseWriter, request *http.Request){
 		"html/list.html",
 		"html/header.html",
 	))
-
-	err := tmpl.Execute(writer, struct{
-		Todos *todo.TodoList
-		Flash string
-	}{todos, ""})
+	
+	var err error
+	if useDatabase{
+		list := database.ListTodos(database.DB)
+		err = tmpl.Execute(writer, struct{
+			Todos *todo.TodoList
+			Flash string
+		}{&list, ""})
+	} else {
+		err = tmpl.Execute(writer, struct{
+			Todos *todo.TodoList
+			Flash string
+		}{todos, ""})
+	}
 	errorCheck(err)
 }
 
@@ -93,12 +115,17 @@ func searchTodosHandler(writer http.ResponseWriter, request *http.Request){
 		"html/header.html",
 	))
 
-	
-	todosSearched, err := todos.SearchInMemory(contents, status)
-	if err != nil{
-		flash.SetFlash(writer, "message", []byte(err.Error()))
-		http.Redirect(writer, request, "/search", http.StatusFound)
-		return
+	var todosSearched []todo.Todo
+	var err error
+	if useDatabase{
+		todosSearched = database.SearchForTodos(database.DB, contents, status)
+	} else {
+		todosSearched, err = todos.SearchInMemory(contents, status)
+		if err != nil{
+			flash.SetFlash(writer, "message", []byte(err.Error()))
+			http.Redirect(writer, request, "/search", http.StatusFound)
+			return
+		}
 	}
 
 	err = tmpl.Execute(writer, struct{
@@ -111,14 +138,20 @@ func searchTodosHandler(writer http.ResponseWriter, request *http.Request){
 func readTodosHandler(writer http.ResponseWriter, request *http.Request){
 	id, err := strconv.Atoi(request.PathValue("id"))
 	errorCheck(err)
-	todo, err := todos.ReadInMemory(id)
-	errorCheck(err)
+
+	var t todo.Todo
+	if useDatabase{
+		t = database.ReadTodo(database.DB, id)
+	} else {
+		t, err = todos.ReadInMemory(id)
+		errorCheck(err)
+	}
 
 	tmpl := template.Must(template.ParseFiles(
 		"html/read.html",
 		"html/header.html",
 	))
-	err = tmpl.Execute(writer, todo)
+	err = tmpl.Execute(writer, t)
 	errorCheck(err)
 }
 
@@ -141,14 +174,21 @@ func createHandler(writer http.ResponseWriter, request *http.Request){
 	contents := request.FormValue("contents")
 	status := request.FormValue("status")
 
-	_, err := todos.CreateInMemory(contents, status)
+	var err error
+	if useDatabase{
+		database.InsertTodo(database.DB, contents, status)
+	} else{
+		_, err = todos.CreateInMemory(contents, status)
+	}
 	if err != nil{
 		flash.SetFlash(writer, "message", []byte(err.Error()))
 		http.Redirect(writer, request, "/new", http.StatusFound)
 		return
 	}
 
-	Save(*todos)
+	if !useDatabase{
+		Save(*todos)
+	}
 
 	http.Redirect(writer, request, "/list", http.StatusFound)
 }
@@ -159,8 +199,14 @@ func updateHandler(writer http.ResponseWriter, request *http.Request){
 
 	id, err := strconv.Atoi(request.PathValue("id"))
 	errorCheck(err)
-	t, err := todos.ReadInMemory(id)
-	errorCheck(err)
+
+	var t todo.Todo
+	if useDatabase{
+		t = database.ReadTodo(database.DB, id)
+	} else {
+		t, err = todos.ReadInMemory(id)
+		errorCheck(err)
+	}
 	
 	tmpl := template.Must(template.ParseFiles(
 		"html/update.html",
@@ -182,15 +228,18 @@ func updateTodoHandler(writer http.ResponseWriter, request *http.Request){
 	id, err := strconv.Atoi(request.PathValue("id"))
 	errorCheck(err)
 
-	_, err = todos.UpdateInMemory(id, contents, status)
-	if err != nil{
-		flash.SetFlash(writer, "message", []byte(err.Error()))
-		http.Redirect(writer, request, fmt.Sprintf("/update/%d", id), http.StatusFound)
-		return
+	if useDatabase{
+		database.UpdateTodo(database.DB, id, contents, status)
+	} else {
+		_, err = todos.UpdateInMemory(id, contents, status)
+		if err != nil{
+			flash.SetFlash(writer, "message", []byte(err.Error()))
+			http.Redirect(writer, request, fmt.Sprintf("/update/%d", id), http.StatusFound)
+			return
+		}
+
+		Save(*todos)
 	}
-
-	Save(*todos)
-
 	http.Redirect(writer, request, "/list", http.StatusFound)
 }
 
@@ -198,10 +247,13 @@ func deleteHandler(writer http.ResponseWriter, request *http.Request){
 	id, err := strconv.Atoi(request.PathValue("id"))
 	errorCheck(err)
 
-	err = todos.DeleteInMemory(id)
-	errorCheck(err)
-
-	Save(*todos)
+	if useDatabase{
+		database.DeleteTodo(database.DB, id)
+	} else {
+		err = todos.DeleteInMemory(id)
+		errorCheck(err)
+		Save(*todos)
+	}
 
 	http.Redirect(writer, request, "/list", http.StatusFound)
 }
