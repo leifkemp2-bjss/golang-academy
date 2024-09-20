@@ -12,6 +12,7 @@ import (
 
 	"academy.com/todoapp/part2/flash"
 	"academy.com/todoapp/todo"
+	"academy.com/todoapp/part2/web/database"
 )
 
 var dir = "../../files/todolist_web.json"
@@ -24,6 +25,7 @@ func errorCheck(err error){
 }
 
 func main(){
+	database.DB = database.Connect()
 	todos, _ = InitialiseTodos()
 	
 	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
@@ -207,7 +209,7 @@ func deleteHandler(writer http.ResponseWriter, request *http.Request){
 func InitialiseTodos()(*todo.TodoList, error){
 	todos := todo.TodoList{
 		List: make(map[int]todo.Todo),
-		MaxSize: 10,
+		MaxSize: 100,
 	}
 
 	err := todos.ReadTodosFromFileToMemory(dir)
