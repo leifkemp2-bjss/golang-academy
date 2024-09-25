@@ -15,8 +15,8 @@ var requestBuffer chan<- apiRequest
 type apiRequest struct {
 	verb     	string
 	Id 			json.Number 	`json:"id"`
-	Contents 	string 	`json:"contents"`
-	Status 		string 	`json:"status"`
+	Contents 	string 			`json:"contents"`
+	Status 		string 			`json:"status"`
 	response 	chan<- []byte
 	err 		chan<- string
 }
@@ -82,84 +82,59 @@ func processLoop(requests <-chan apiRequest) <-chan struct{} {
 				if req.Id == "" {
 					if req.Contents == "" && req.Status == "" {
 						result, err = database.ListTodos(database.DB)
-						if err != nil {
-							req.err <- err.Error()
-						}
+						errorCheck(err, req)
 					} else {
 						result, err = database.SearchForTodos(database.DB, req.Contents, req.Status)
-						if err != nil {
-							req.err <- err.Error()
-						}
+						errorCheck(err, req)
 					}
 				} else {
 					id, err := req.Id.Int64()
-					if err != nil {
-						req.err <- err.Error()
-					}
+					errorCheck(err, req)
 
 					result, err = database.ReadTodo(database.DB, int(id))
-					if err != nil {
-						req.err <- err.Error()
-					}
+					errorCheck(err, req)
 				}
 				value, err := json.Marshal(result)
-				if err != nil {
-					req.err <- err.Error()
-				}
+				errorCheck(err, req)
+
 				req.response <- value
 			case http.MethodPost:
 				result, err := database.InsertTodo(database.DB, req.Contents, req.Status)
-				if err != nil {
-					req.err <- err.Error()
-				}
+				errorCheck(err, req)
+
 				value, err := json.Marshal(result)
-				if err != nil {
-					req.err <- err.Error()
-				}
+				errorCheck(err, req)
+
 				req.response <- value				
 			case http.MethodDelete:
 				id, err := req.Id.Int64()
-				if err != nil {
-					req.err <- err.Error()
-				}
+				errorCheck(err, req)
+
 				err = database.DeleteTodo(database.DB, int(id))
-				if err != nil {
-					req.err <- err.Error()
-				}
+				errorCheck(err, req)
+
 				req.response <- []byte{}
 			case http.MethodPut:
 				id, err := req.Id.Int64()
-				if err != nil {
-					req.err <- err.Error()
-				}
+				errorCheck(err, req)
+
 				result, err := database.UpdateTodo(database.DB, int(id), req.Contents, req.Status)
-				if err != nil {
-					req.err <- err.Error()
-				}
+				errorCheck(err, req)
 
 				value, err := json.Marshal(result)
-				if err != nil {
-					req.err <- err.Error()
-				}
+				errorCheck(err, req)
 				req.response <- value
-
-			// case http.MethodPut:
-			// case http.MethodPost:
-			// case http.MethodPatch:
-			// 	store[req.key] = req.value
-
-			// case http.MethodGet:
-			// 	value, ok := store[req.key]
-			// 	if !ok {
-			// 		log.Printf("could not find value for key %v", req.key)
-			// 	} else {
-			// 		req.response <- value
-			// 	}
 			}
 			close(req.response)
 		}
 	}()
 	return done
+}
+
+func errorCheck(err error, req apiRequest){
+	if err != nil {
+		req.err <- err.Error()
+	}
 }
 
 func handle(rw http.ResponseWriter, r *http.Request) {

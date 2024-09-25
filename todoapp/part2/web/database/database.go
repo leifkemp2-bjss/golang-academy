@@ -15,7 +15,7 @@ var DB *sql.DB
 func Connect() *sql.DB{
 	fmt.Println("Creating database")
 	// connStr := "postgres://postgres:secret@localhost:5432/tododb?sslmode=disable"
-	connStr := "user=academy password=secret host=localhost port=5432 dbname=tododb sslmode=disable"
+	connStr := "user=academy password=secret host=localhost port=5433 dbname=tododb sslmode=disable"
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
