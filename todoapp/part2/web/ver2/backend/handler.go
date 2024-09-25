@@ -78,10 +78,18 @@ func processLoop(requests <-chan apiRequest) <-chan struct{} {
 			case http.MethodGet:
 				var result any
 				var err error
+				// if no id exists, it's either a list or a search, if an id exists, we get a specific one
 				if req.Id == "" {
-					result, err = database.ListTodos(database.DB)
-					if err != nil {
-						req.err <- err.Error()
+					if req.Contents == "" && req.Status == "" {
+						result, err = database.ListTodos(database.DB)
+						if err != nil {
+							req.err <- err.Error()
+						}
+					} else {
+						result, err = database.SearchForTodos(database.DB, req.Contents, req.Status)
+						if err != nil {
+							req.err <- err.Error()
+						}
 					}
 				} else {
 					id, err := req.Id.Int64()

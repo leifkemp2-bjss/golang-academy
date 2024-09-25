@@ -9,8 +9,10 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"academy.com/todoapp/todo"
+	"academy.com/todoapp/part2/flash"
 )
 
 func errorCheck(err error){
@@ -29,8 +31,8 @@ func main(){
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/list", listTodosHandler)
 	http.HandleFunc("/delete/{id}", deleteTodoHandler)
-	// http.HandleFunc("/search/results", searchTodosHandler)
-	// http.HandleFunc("/search", searchHandler)
+	http.HandleFunc("/search/results", searchTodosHandler)
+	http.HandleFunc("/search", searchHandler)
 	http.HandleFunc("/read/{id}", readTodoHandler)	
 	// http.HandleFunc("/new", newHandler)
 	// http.HandleFunc("/update/{id}", updateHandler)
@@ -113,4 +115,67 @@ func deleteTodoHandler(writer http.ResponseWriter, request *http.Request){
 	defer resp.Body.Close()
 
 	http.Redirect(writer, request, "/list", http.StatusFound)
+}
+
+func searchHandler(writer http.ResponseWriter, request *http.Request){
+	flash, err := flash.GetFlash(writer, request, "message")
+	errorCheck(err)
+
+	tmpl := template.Must(template.ParseFiles(
+		"../../html/search.html",
+		"../../html/header.html",
+	))
+
+	err = tmpl.Execute(writer, struct{
+		Flash string
+	}{string(flash)})
+	errorCheck(err)
+}
+
+func searchTodosHandler(writer http.ResponseWriter, request *http.Request){
+	contents := request.FormValue("contents")
+	contents = strings.TrimSpace(contents)
+	status := request.FormValue("status")
+	status = strings.TrimSpace(status)
+
+	// this is checked in the frontend because without either of these filled, the backend thinks it will be a list
+	if contents == "" && status == "" {
+		flash.SetFlash(writer, "message", []byte("contents and status have not been provided, please provide at least one"))
+		http.Redirect(writer, request, "/search", http.StatusFound)
+		return
+	}
+	
+	tmpl := template.Must(template.ParseFiles(
+		"../../html/searchresults.html",
+		"../../html/header.html",
+	))
+
+	var err error
+	var jsonStr = []byte(fmt.Sprintf(`{"contents":"%s","status":"%s"}`, contents, status))
+	req, err := http.NewRequest("GET", "http://localhost:8081/", bytes.NewBuffer(jsonStr))
+	errorCheck(err)
+
+	resp, err := client.Do(req)
+	errorCheck(err)
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	errorCheck(err)
+
+	fmt.Println(string(respBody))
+
+	body := []todo.Todo{}
+	json.Unmarshal(respBody, &body)
+
+	if err != nil{
+		flash.SetFlash(writer, "message", []byte(err.Error()))
+		http.Redirect(writer, request, "/search", http.StatusFound)
+		return
+	}
+
+	err = tmpl.Execute(writer, struct{
+		Field string
+		Todos []todo.Todo
+	}{request.PathValue("contents"), body})
+	errorCheck(err)
 }
