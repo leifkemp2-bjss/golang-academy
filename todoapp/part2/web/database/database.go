@@ -46,46 +46,60 @@ func CreateTodosTable(db *sql.DB){
 	println("Todos table created")
 }
 
-func InsertTodo(db *sql.DB, contents string, status string) int {
+func InsertTodo(db *sql.DB, contents string, status string)(int, error) {
+	if contents == "" {
+		return -1, fmt.Errorf("contents field has not been provided")
+	}
+	if status == "" {
+		return -1, fmt.Errorf("status field has not been provided")
+	}
+
 	query := `INSERT INTO todos (contents, status) VALUES ($1, $2) RETURNING id`
 
 	var id int
 	err := db.QueryRow(query, contents, status).Scan(&id)
 	if err != nil {
-		log.Fatal(err)
+		return -1, err
 	}
 
-	return id
+	return id, nil
 }
 
-func UpdateTodo(db *sql.DB, id int, contents string, status string) {
+func UpdateTodo(db *sql.DB, id int, contents string, status string)(int, error) {
 	var query string
 	var err error
+	// var t todo.Todo
+	var updatedId int
 	if contents == "" && status == "" {
-		log.Fatal("content and status fields have not been provided")
+		return -1, fmt.Errorf("content and status fields have not been provided")
 	} else if contents != "" && status == "" {
 		query = `UPDATE todos SET contents=($1) WHERE id=($2)`
-		_, err = db.Exec(query, contents, id)
+		err = db.QueryRow(query, contents, id).Scan(&updatedId)
 	} else if contents == "" && status != "" {
 		query = `UPDATE todos SET status=($1) WHERE id=($2)`
-		_, err = db.Exec(query, status, id)
+		err = db.QueryRow(query, status, id).Scan(&updatedId)
 	} else {
 		query = `UPDATE todos SET contents=($1), status=($2) WHERE id=($3)`
-		_, err = db.Exec(query, contents, status, id)
+		err = db.QueryRow(query, contents, status, id).Scan(&updatedId)
 	}
 
 	
 	if err != nil {
 		log.Fatal(err)
+		return -1, err
 	}
+	return updatedId, nil
 }
 
-func SearchForTodos(db *sql.DB, contents string, status string)(output []todo.Todo) {
+func SearchForTodos(db *sql.DB, contents string, status string)(output []todo.Todo, err error) {
+	if contents == "" && status == "" {
+		return nil, fmt.Errorf("contents and status have not been provided, please provide at least one")
+	}
+
 	output = []todo.Todo{}
 
 	var query string
 	var rows *sql.Rows
-	var err error
 	if contents == "" && status == "" {
 		log.Fatal("content and status fields have not been provided")
 	} else if contents != "" && status == "" {
@@ -115,45 +129,43 @@ func SearchForTodos(db *sql.DB, contents string, status string)(output []todo.To
 		output = append(output, t)
 	}
 
-	return output
+	return output, nil
 }
 
-func DeleteTodo(db *sql.DB, id int){
+func DeleteTodo(db *sql.DB, id int) (error){
 	_, err := db.Exec("DELETE FROM todos WHERE id=($1)", id)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
 
-func ReadTodo(db *sql.DB, id int) todo.Todo{
+func ReadTodo(db *sql.DB, id int) (todo.Todo, error){
 	result := db.QueryRow("SELECT * FROM todos WHERE id=($1)", id)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 	var t todo.Todo
 	if err := result.Scan(&t.Id, &t.Contents, &t.Status); err != nil {
-		log.Fatal(err)
+		return t, err
 	}
-	return t
+	return t, nil
 }
 
-func ListTodos(db *sql.DB)(output todo.TodoList) {
-	output = todo.TodoList{
+func ListTodos(db *sql.DB)(todo.TodoList, error) {
+	output := todo.TodoList{
 		List: make(map[int]todo.Todo),
 		MaxSize: 100,
 	} 
 	rows, err := db.Query(`SELECT * FROM todos`)
 	if err != nil {
-		log.Fatal(err)
+		return output, err
 	}
 
 	for rows.Next() {
 		var t todo.Todo
 		if err := rows.Scan(&t.Id, &t.Contents, &t.Status); err != nil {
-			log.Fatal(err)
+			return output, err
 		}
 		output.List[t.Id] = t
 	}
 
-	return output
+	return output, nil
 }

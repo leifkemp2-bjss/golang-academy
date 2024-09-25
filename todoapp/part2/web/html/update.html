@@ -1,7 +1,7 @@
 {{ template "header" }}
 <body>
     <h2>Updating To Do {{.Todo.Id}}</h2>
-    <form action="/update_todo/{{.Todo.Id}}" method="POST">
+    <form action="/edit/{{.Todo.Id}}" method="PUT">
         <div id="forminput">
             <p>Contents:</p>
             <input type="text" name="contents" value="{{.Todo.Contents}}" placeholder="{{.Todo.Contents}}">

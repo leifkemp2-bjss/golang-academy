@@ -1,5 +1,8 @@
 package main
 
+// This is version 1 of my web app, it has In Memory and SQL integration via Postgres, but is not
+// thread safe.
+
 import (
 	// "bufio"
 	"fmt"
@@ -16,7 +19,7 @@ import (
 	"academy.com/todoapp/part2/web/database"
 )
 
-var dir = "../../files/todolist_web.json"
+var dir = "../../../files/todolist_web.json"
 var todos *todo.TodoList
 var useDatabase bool
 
@@ -41,7 +44,7 @@ func main(){
 		todos, _ = InitialiseTodos()
 	}
 	
-	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("./assets"))))
+	http.Handle("/assets/", http.StripPrefix("/assets/", http.FileServer(http.Dir("../assets"))))
 
 	http.HandleFunc("/", rootHandler)
 	http.HandleFunc("/list", listTodosHandler)
@@ -51,7 +54,7 @@ func main(){
 	http.HandleFunc("/new", newHandler)
 	http.HandleFunc("/update/{id}", updateHandler)
 	http.HandleFunc("/create", createHandler)
-	http.HandleFunc("/update_todo/{id}", updateTodoHandler)
+	http.HandleFunc("/edit/{id}", editTodoHandler)
 	http.HandleFunc("/delete/{id}", deleteHandler)
 	fmt.Println("Running web app...")
 	err := http.ListenAndServe("localhost:8080", nil)
@@ -60,8 +63,8 @@ func main(){
 
 func rootHandler(writer http.ResponseWriter, request *http.Request){
 	tmpl := template.Must(template.ParseFiles(
-		"html/main.html",
-		"html/header.html",
+		"../html/main.html",
+		"../html/header.html",
 	))
 	err := tmpl.Execute(writer, nil)
 	errorCheck(err)
@@ -69,13 +72,13 @@ func rootHandler(writer http.ResponseWriter, request *http.Request){
 
 func listTodosHandler(writer http.ResponseWriter, request *http.Request){
 	tmpl := template.Must(template.ParseFiles(
-		"html/list.html",
-		"html/header.html",
+		"../html/list.html",
+		"../html/header.html",
 	))
 	
 	var err error
 	if useDatabase{
-		list := database.ListTodos(database.DB)
+		list, _ := database.ListTodos(database.DB)
 		err = tmpl.Execute(writer, struct{
 			Todos *todo.TodoList
 			Flash string
@@ -94,8 +97,8 @@ func searchHandler(writer http.ResponseWriter, request *http.Request){
 	errorCheck(err)
 
 	tmpl := template.Must(template.ParseFiles(
-		"html/search.html",
-		"html/header.html",
+		"../html/search.html",
+		"../html/header.html",
 	))
 
 	err = tmpl.Execute(writer, struct{
@@ -111,21 +114,22 @@ func searchTodosHandler(writer http.ResponseWriter, request *http.Request){
 	status = strings.TrimSpace(status)
 	
 	tmpl := template.Must(template.ParseFiles(
-		"html/searchresults.html",
-		"html/header.html",
+		"../html/searchresults.html",
+		"../html/header.html",
 	))
 
 	var todosSearched []todo.Todo
 	var err error
 	if useDatabase{
-		todosSearched = database.SearchForTodos(database.DB, contents, status)
+		todosSearched, err = database.SearchForTodos(database.DB, contents, status)
 	} else {
 		todosSearched, err = todos.SearchInMemory(contents, status)
-		if err != nil{
-			flash.SetFlash(writer, "message", []byte(err.Error()))
-			http.Redirect(writer, request, "/search", http.StatusFound)
-			return
-		}
+	}
+
+	if err != nil{
+		flash.SetFlash(writer, "message", []byte(err.Error()))
+		http.Redirect(writer, request, "/search", http.StatusFound)
+		return
 	}
 
 	err = tmpl.Execute(writer, struct{
@@ -141,15 +145,15 @@ func readTodosHandler(writer http.ResponseWriter, request *http.Request){
 
 	var t todo.Todo
 	if useDatabase{
-		t = database.ReadTodo(database.DB, id)
+		t, _ = database.ReadTodo(database.DB, id)
 	} else {
 		t, err = todos.ReadInMemory(id)
 		errorCheck(err)
 	}
 
 	tmpl := template.Must(template.ParseFiles(
-		"html/read.html",
-		"html/header.html",
+		"../html/read.html",
+		"../html/header.html",
 	))
 	err = tmpl.Execute(writer, t)
 	errorCheck(err)
@@ -160,8 +164,8 @@ func newHandler(writer http.ResponseWriter, request *http.Request){
 	errorCheck(err)
 
 	tmpl := template.Must(template.ParseFiles(
-		"html/new.html",
-		"html/header.html",
+		"../html/new.html",
+		"../html/header.html",
 	))
 
 	err = tmpl.Execute(writer, struct{
@@ -202,15 +206,15 @@ func updateHandler(writer http.ResponseWriter, request *http.Request){
 
 	var t todo.Todo
 	if useDatabase{
-		t = database.ReadTodo(database.DB, id)
+		t, _ = database.ReadTodo(database.DB, id)
 	} else {
 		t, err = todos.ReadInMemory(id)
 		errorCheck(err)
 	}
 	
 	tmpl := template.Must(template.ParseFiles(
-		"html/update.html",
-		"html/header.html",
+		"../html/update.html",
+		"../html/header.html",
 	))
 
 	err = tmpl.Execute(writer, struct{
@@ -221,7 +225,7 @@ func updateHandler(writer http.ResponseWriter, request *http.Request){
 	errorCheck(err)
 }
 
-func updateTodoHandler(writer http.ResponseWriter, request *http.Request){
+func editTodoHandler(writer http.ResponseWriter, request *http.Request){
 	contents := request.FormValue("contents")
 	status := request.FormValue("status")
 
