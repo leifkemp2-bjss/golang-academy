@@ -126,6 +126,7 @@ func processLoop(requests <-chan apiRequest) <-chan struct{} {
 				req.response <- value
 			}
 			close(req.response)
+			close(req.err)
 		}
 	}()
 	return done

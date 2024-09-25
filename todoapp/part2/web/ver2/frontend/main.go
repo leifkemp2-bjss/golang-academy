@@ -271,20 +271,5 @@ func editTodoHandler(writer http.ResponseWriter, request *http.Request){
 	}
 	defer resp.Body.Close()
 
-	
-
-	// if useDatabase{
-	// 	database.UpdateTodo(database.DB, id, contents, status)
-	// } else {
-	// 	_, err = todos.UpdateInMemory(id, contents, status)
-	// 	if err != nil{
-	// 		flash.SetFlash(writer, "message", []byte(err.Error()))
-	// 		http.Redirect(writer, request, fmt.Sprintf("/update/%d", id), http.StatusFound)
-	// 		return
-	// 	}
-
-	// 	Save(*todos)
-	// }
-
 	http.Redirect(writer, request, "/list", http.StatusFound)
 }

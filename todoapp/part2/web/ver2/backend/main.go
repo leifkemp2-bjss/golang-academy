@@ -3,20 +3,11 @@ package main
 // This is version 2 of the web app, it uses only an SQL database and is written to be thread safe
 
 import (
-	// "bufio"
 	"fmt"
-	// "html/template"
-	// "log"
-	// "net/http"
 	"os"
 	"os/signal"
-	// "strconv"
-	// "strings"
-	// "flag"
 	"context"
 
-	// "academy.com/todoapp/part2/flash"
-	// "academy.com/todoapp/todo"
 	"academy.com/todoapp/part2/web/database"
 )
 
