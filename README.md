@@ -2,7 +2,7 @@
 This is my attempt at the BJSS Go Academy, based on the Kepler version of the exercise.
 There are 3 different sections:
 - Assignments, this is where assignments 1 to 10 can be found
-- To Do App, this is the To Do application, split into the CLI and the Web App. The Web App can function with either In Memory Storage, or use a PostgreSQL docker container.
+- To Do App (version 1 and 2), this is the To Do application, split into the CLI and the Web App. The Web App can function with either In Memory Storage, or use a PostgreSQL docker container.
 - Thread Safe Test, this is a test at writing a server that could concurrently handle requests in a thread safe manner
 
 ## Running each application
@@ -29,15 +29,22 @@ Run the threadsafetest.exe file in the threadsafetest folder, the API can then b
 - contents / c - The contents parameter
 - status / s - The status parameter
 - id / i - The ID parameter
-#### Web App
+#### Web App - Version 1
 ##### In Memory Storage
-To run the webapp, run the part2.exe file in the todoapp/part2/web folder, the app can then be accessed from <b>localhost:8080</b>
+To run the webapp, run the ver1.exe file in the todoapp/part2/web/ver1 folder, the app can then be accessed from <b>localhost:8080</b>
 ##### PostgreSQL Storage
 To run the database, Docker is required.
 
-To run the webapp utilising a PostgreSQL database, run ```docker compose up -d``` on the docker-compose.yml file. Then run the part2.exe file with the ```-db``` flag to tell the application to use the database.
+To run the webapp utilising a PostgreSQL database, run ```docker compose up -d``` on the docker-compose.yml file. Then run the ver1.exe file with the ```-db``` flag to tell the application to use the database.
 
 To tear down the container after finishing with the program, use ```docker compose down -v``` to also remove the volumes the container creates.
+
+#### Web App - Version 2
+To run Version 2 of the webapp, use ```go run .``` in both the todoapp/part2/web/ver2/frontend and todoapp/part2/web/ver2/backend folders. This initialises both the frontend and the backend for the application.
+
+The website can then be accessed from <b>localhost:8080</b>, while the backend can be accessed from <b>localhost:8081</b>.
+
+This version of the application only uses the PostgreSQL database, see the above step for creating the database container.
 
 ## File Storage
 Some programs in this repository create files that are stored in either assignments/files, or todoapp/files.
