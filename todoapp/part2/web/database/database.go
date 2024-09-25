@@ -85,7 +85,6 @@ func UpdateTodo(db *sql.DB, id int, contents string, status string)(int, error) 
 
 	
 	if err != nil {
-		log.Fatal(err)
 		return -1, err
 	}
 	return updatedId, nil
