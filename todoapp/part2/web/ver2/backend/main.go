@@ -17,7 +17,7 @@ func main(){
 	database.DB = database.Connect()
 	database.CreateTodosTable(database.DB, "todos")
 
-	done := startApi(ctx)
+	done := startApi(ctx, "localhost:8081")
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)

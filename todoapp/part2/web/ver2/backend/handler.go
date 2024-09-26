@@ -22,13 +22,13 @@ type apiRequest struct {
 	err 		chan<- string
 }
 
-func startApi(ctx context.Context) <-chan struct{} {
+func startApi(ctx context.Context, addr string) <-chan struct{} {
 	requests := make(chan apiRequest, 10)
 	requestBuffer = requests
 	done := make(chan struct{})
 	// middleware
 	// authentication
-	srv := &http.Server{Addr: "localhost:8081"}
+	srv := &http.Server{Addr: addr}
 
 	http.HandleFunc("/", handle)
 
