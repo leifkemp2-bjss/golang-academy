@@ -11,6 +11,7 @@ import (
 )
 
 var DB *sql.DB
+var tableName string
 
 func Connect() *sql.DB{
 	fmt.Println("Creating database")
@@ -30,20 +31,21 @@ func Connect() *sql.DB{
 	return db
 }
 
-func CreateTodosTable(db *sql.DB){
-	query := `
-	CREATE TABLE IF NOT EXISTS todos(
+func CreateTodosTable(db *sql.DB, name string){
+	tableName = name
+	query := fmt.Sprintf(`
+	CREATE TABLE IF NOT EXISTS %s(
 	id SERIAL PRIMARY KEY,
 	contents TEXT NOT NULL,
 	status TEXT NOT NULL
-	)`
+	)`, tableName)
 
 	_, err := db.Exec(query)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	println("Todos table created")
+	fmt.Printf("%s table created\n", tableName)
 }
 
 func InsertTodo(db *sql.DB, contents string, status string)(int, error) {
@@ -54,7 +56,7 @@ func InsertTodo(db *sql.DB, contents string, status string)(int, error) {
 		return -1, fmt.Errorf("status field has not been provided")
 	}
 
-	query := `INSERT INTO todos (contents, status) VALUES ($1, $2) RETURNING id`
+	query := fmt.Sprintf(`INSERT INTO %s (contents, status) VALUES ($1, $2) RETURNING id`, tableName)
 
 	var id int
 	err := db.QueryRow(query, contents, status).Scan(&id)
@@ -73,13 +75,13 @@ func UpdateTodo(db *sql.DB, id int, contents string, status string)(int, error) 
 	if contents == "" && status == "" {
 		return -1, fmt.Errorf("content and status fields have not been provided")
 	} else if contents != "" && status == "" {
-		query = `UPDATE todos SET contents=($1) WHERE id=($2)`
+		query = fmt.Sprintf(`UPDATE %s SET contents=($1) WHERE id=($2)`, tableName)
 		err = db.QueryRow(query, contents, id).Scan(&updatedId)
 	} else if contents == "" && status != "" {
-		query = `UPDATE todos SET status=($1) WHERE id=($2)`
+		query = fmt.Sprintf(`UPDATE %s SET status=($1) WHERE id=($2)`, tableName)
 		err = db.QueryRow(query, status, id).Scan(&updatedId)
 	} else {
-		query = `UPDATE todos SET contents=($1), status=($2) WHERE id=($3)`
+		query = fmt.Sprintf(`UPDATE %s SET contents=($1), status=($2) WHERE id=($3)`, tableName)
 		err = db.QueryRow(query, contents, status, id).Scan(&updatedId)
 	}
 
@@ -102,15 +104,15 @@ func SearchForTodos(db *sql.DB, contents string, status string)(output []todo.To
 	if contents == "" && status == "" {
 		log.Fatal("content and status fields have not been provided")
 	} else if contents != "" && status == "" {
-		query = fmt.Sprintf(`SELECT * FROM todos WHERE LOWER(contents) LIKE '%s'`, 
+		query = fmt.Sprintf(`SELECT * FROM %s WHERE LOWER(contents) LIKE '%s'`, tableName,
 			"%" + strings.ToLower(contents) + "%")
 			
 		rows, err = db.Query(query)
 	} else if contents == "" && status != "" {
-		query = `SELECT * FROM todos WHERE status=($1)`
+		query = fmt.Sprintf(`SELECT * FROM %s WHERE status=($1)`, tableName)
 		rows, err = db.Query(query, status)
 	} else {
-		query = fmt.Sprintf(`SELECT * FROM todos WHERE LOWER(contents) LIKE '%s' AND status=($1)`, 
+		query = fmt.Sprintf(`SELECT * FROM %s WHERE LOWER(contents) LIKE '%s' AND status=($1)`, tableName,
 			"%" + strings.ToLower(contents) + "%")
 
 		rows, err = db.Query(query, status)
@@ -132,7 +134,7 @@ func SearchForTodos(db *sql.DB, contents string, status string)(output []todo.To
 }
 
 func DeleteTodo(db *sql.DB, id int) (error){
-	_, err := db.Exec("DELETE FROM todos WHERE id=($1)", id)
+	_, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id=($1)", tableName), id)
 	if err != nil {
 		return err
 	}
@@ -140,7 +142,7 @@ func DeleteTodo(db *sql.DB, id int) (error){
 }
 
 func ReadTodo(db *sql.DB, id int) (todo.Todo, error){
-	result := db.QueryRow("SELECT * FROM todos WHERE id=($1)", id)
+	result := db.QueryRow(fmt.Sprintf("SELECT * FROM %s WHERE id=($1)", tableName), id)
 	var t todo.Todo
 	if err := result.Scan(&t.Id, &t.Contents, &t.Status); err != nil {
 		return t, err
@@ -153,7 +155,7 @@ func ListTodos(db *sql.DB)(todo.TodoList, error) {
 		List: make(map[int]todo.Todo),
 		MaxSize: 100,
 	} 
-	rows, err := db.Query(`SELECT * FROM todos`)
+	rows, err := db.Query(fmt.Sprintf(`SELECT * FROM %s`, tableName))
 	if err != nil {
 		return output, err
 	}

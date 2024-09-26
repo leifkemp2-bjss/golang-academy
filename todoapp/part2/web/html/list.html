@@ -11,7 +11,7 @@
         {{range .Todos.List}}
         <div id = "todoitem">
             <p>
-                {{.}}
+                Id - {{.}}
             </p>
             <form action="/read/{{.Id}}">
                 <input type="submit" value="Read"/>

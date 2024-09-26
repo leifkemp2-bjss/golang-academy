@@ -39,7 +39,7 @@ func main(){
 
 	if useDatabase {
 		database.DB = database.Connect()
-		database.CreateTodosTable(database.DB)
+		database.CreateTodosTable(database.DB, "todos")
 	} else {
 		todos, _ = InitialiseTodos()
 	}

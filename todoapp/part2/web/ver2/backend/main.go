@@ -15,7 +15,7 @@ func main(){
 	ctx, ctxDone := context.WithCancel(context.Background())
 
 	database.DB = database.Connect()
-	database.CreateTodosTable(database.DB)
+	database.CreateTodosTable(database.DB, "todos")
 
 	done := startApi(ctx)
 

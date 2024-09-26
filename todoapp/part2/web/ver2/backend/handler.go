@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"time"
 
 	"academy.com/todoapp/part2/web/database"
 )
@@ -82,47 +83,47 @@ func processLoop(requests <-chan apiRequest) <-chan struct{} {
 				if req.Id == "" {
 					if req.Contents == "" && req.Status == "" {
 						result, err = database.ListTodos(database.DB)
-						errorCheck(err, req)
+						errorCheckChannel(err, req)
 					} else {
 						result, err = database.SearchForTodos(database.DB, req.Contents, req.Status)
-						errorCheck(err, req)
+						errorCheckChannel(err, req)
 					}
 				} else {
 					id, err := req.Id.Int64()
-					errorCheck(err, req)
+					errorCheckChannel(err, req)
 
 					result, err = database.ReadTodo(database.DB, int(id))
-					errorCheck(err, req)
+					errorCheckChannel(err, req)
 				}
 				value, err := json.Marshal(result)
-				errorCheck(err, req)
+				errorCheckChannel(err, req)
 
 				req.response <- value
 			case http.MethodPost:
 				result, err := database.InsertTodo(database.DB, req.Contents, req.Status)
-				errorCheck(err, req)
+				errorCheckChannel(err, req)
 
 				value, err := json.Marshal(result)
-				errorCheck(err, req)
+				errorCheckChannel(err, req)
 
 				req.response <- value				
 			case http.MethodDelete:
 				id, err := req.Id.Int64()
-				errorCheck(err, req)
+				errorCheckChannel(err, req)
 
 				err = database.DeleteTodo(database.DB, int(id))
-				errorCheck(err, req)
+				errorCheckChannel(err, req)
 
 				req.response <- []byte{}
 			case http.MethodPut:
 				id, err := req.Id.Int64()
-				errorCheck(err, req)
+				errorCheckChannel(err, req)
 
 				result, err := database.UpdateTodo(database.DB, int(id), req.Contents, req.Status)
-				errorCheck(err, req)
+				errorCheckChannel(err, req)
 
 				value, err := json.Marshal(result)
-				errorCheck(err, req)
+				errorCheckChannel(err, req)
 				req.response <- value
 			}
 			close(req.response)
@@ -132,7 +133,7 @@ func processLoop(requests <-chan apiRequest) <-chan struct{} {
 	return done
 }
 
-func errorCheck(err error, req apiRequest){
+func errorCheckChannel(err error, req apiRequest){
 	if err != nil {
 		req.err <- err.Error()
 	}
@@ -184,5 +185,8 @@ func handle(rw http.ResponseWriter, r *http.Request) {
 	case err := <-errChan:
 		rw.WriteHeader(http.StatusBadRequest)
 		rw.Write([]byte(err))
+	case <-time.After(5 * time.Second):
+		rw.WriteHeader(http.StatusRequestTimeout)
+		rw.Write([]byte("timed out after 5 seconds"))
 	}
 }
