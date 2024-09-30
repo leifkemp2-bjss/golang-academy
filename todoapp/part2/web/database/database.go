@@ -67,29 +67,28 @@ func InsertTodo(db *sql.DB, contents string, status string)(int, error) {
 	return id, nil
 }
 
-func UpdateTodo(db *sql.DB, id int, contents string, status string)(int, error) {
+func UpdateTodo(db *sql.DB, id_i int, contents string, status string)(int, error) {
 	var query string
 	var err error
 	// var t todo.Todo
-	var updatedId int
+	var id int
 	if contents == "" && status == "" {
 		return -1, fmt.Errorf("content and status fields have not been provided")
 	} else if contents != "" && status == "" {
-		query = fmt.Sprintf(`UPDATE %s SET contents=($1) WHERE id=($2)`, tableName)
-		err = db.QueryRow(query, contents, id).Scan(&updatedId)
+		query = fmt.Sprintf(`UPDATE %s SET contents=($1) WHERE id=($2) RETURNING id`, tableName)
+		err = db.QueryRow(query, contents, id_i).Scan(&id)
 	} else if contents == "" && status != "" {
-		query = fmt.Sprintf(`UPDATE %s SET status=($1) WHERE id=($2)`, tableName)
-		err = db.QueryRow(query, status, id).Scan(&updatedId)
+		query = fmt.Sprintf(`UPDATE %s SET status=($1) WHERE id=($2) RETURNING id`, tableName)
+		err = db.QueryRow(query, status, id_i).Scan(&id)
 	} else {
-		query = fmt.Sprintf(`UPDATE %s SET contents=($1), status=($2) WHERE id=($3)`, tableName)
-		err = db.QueryRow(query, contents, status, id).Scan(&updatedId)
+		query = fmt.Sprintf(`UPDATE %s SET contents=($1), status=($2) WHERE id=($3) RETURNING id`, tableName)
+		err = db.QueryRow(query, contents, status, id_i).Scan(&id)
 	}
-
 	
 	if err != nil {
 		return -1, err
 	}
-	return updatedId, nil
+	return id, nil
 }
 
 func SearchForTodos(db *sql.DB, contents string, status string)(output []todo.Todo, err error) {

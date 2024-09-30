@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -121,10 +122,7 @@ func processLoop(requests <-chan apiRequest) <-chan struct{} {
 
 				result, err := database.UpdateTodo(database.DB, int(id), req.Contents, req.Status)
 				errorCheckChannel(err, req)
-
-				value, err := json.Marshal(result)
-				errorCheckChannel(err, req)
-				req.response <- value
+				req.response <- []byte(fmt.Sprintf("%d", result))
 			}
 			close(req.response)
 			close(req.err)
@@ -171,10 +169,10 @@ func handle(rw http.ResponseWriter, r *http.Request) {
 
 	select {
 	case response, ok := <-responseChan:
-		if r.Method != http.MethodGet && r.Method != http.MethodDelete {
-			rw.WriteHeader(http.StatusOK)
-			return
-		}
+		// if r.Method != http.MethodGet && r.Method != http.MethodDelete && r.Method != http.MethodPut {
+		// 	rw.WriteHeader(http.StatusOK)
+		// 	return
+		// }
 	
 		if ok {
 			rw.WriteHeader(http.StatusOK)

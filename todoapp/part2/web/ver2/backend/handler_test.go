@@ -127,6 +127,74 @@ func TestGetInvalid(t *testing.T){
 	}
 }
 
+func TestUpdate(t *testing.T){
+	want := todo.Todo{
+		Id: 1,
+		Contents: "Update this todo",
+		Status: "In Progress",
+	}
+
+	var jsonStr = []byte(`{"id":"1","status":"In Progress","contents":"Update this todo"}`)
+	req, err := http.NewRequest("PUT", "http://localhost:8082/", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Error(err)
+	}
+
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var body int
+	json.Unmarshal(respBody, &body)
+
+	if body != 1 {
+		t.Errorf("the update function should return the todo's ID after completing the update, got %d", body)
+	}
+
+	todoGot, err := database.ReadTodo(database.DB, 1)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(todoGot, want){
+		t.Errorf("expecting %v, got %v", want, todoGot)
+	}
+}
+
+func TestUpdateInvalid(t *testing.T){
+	var jsonStr = []byte(`{"id":"999","contents":"Non-existent todo (updated)","status":"In Progress"}`)
+	req, err := http.NewRequest("PUT", "http://localhost:8082/", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Error(err)
+	}
+
+	defer resp.Body.Close()
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if resp.StatusCode != 400 {
+		t.Errorf("expecting an error code of 400 when trying to update a todo that doesn't exist, got %d", resp.StatusCode)
+	}
+	if string(respBody) != "sql: no rows in result set" {
+		t.Errorf("got %s, want 'sql: no rows in result set'", string(respBody))
+	}
+}
+
 func createTestServer(ctx context.Context) <- chan struct{}{
 	database.DB = database.Connect()
 
