@@ -169,11 +169,6 @@ func handle(rw http.ResponseWriter, r *http.Request) {
 
 	select {
 	case response, ok := <-responseChan:
-		// if r.Method != http.MethodGet && r.Method != http.MethodDelete && r.Method != http.MethodPut {
-		// 	rw.WriteHeader(http.StatusOK)
-		// 	return
-		// }
-	
 		if ok {
 			rw.WriteHeader(http.StatusOK)
 			rw.Write(response)
