@@ -69,7 +69,7 @@ func TestGet(t *testing.T){
 		Id: 2, Contents: "Test Todo 2", Status: "In Progress",
 	}
 
-	var jsonStr = []byte(fmt.Sprintf(`{"id":"%d"}`, 2))
+	var jsonStr = []byte(`{"id":"2"}`)
 	responseBody := performRequest(t, "GET", jsonStr, 200)
 	defer responseBody.Close()
 
@@ -87,7 +87,7 @@ func TestGet(t *testing.T){
 }
 
 func TestGetInvalid(t *testing.T){
-	var jsonStr = []byte(fmt.Sprintf(`{"id":"%d"}`, 999))
+	var jsonStr = []byte(`{"id":"999"}`)
 	responseBody := performRequest(t, "GET", jsonStr, 400)
 	defer responseBody.Close()
 
