@@ -218,6 +218,8 @@ func TestPostNoBody(t *testing.T){
 }
 
 func TestPut(t *testing.T){
+	seedTestDatabase()
+	
 	want := todo.Todo{
 		Id: 1,
 		Contents: "Update this todo",
