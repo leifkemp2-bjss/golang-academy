@@ -101,6 +101,77 @@ func TestGetInvalid(t *testing.T){
 	}
 }
 
+func TestSearch(t *testing.T){
+	seedTestDatabase()
+
+	cases := []struct{
+		jsonStr []byte
+		want []todo.Todo
+	}{
+		{
+			jsonStr: []byte(`{"status":"In Progress"}`), 
+			want: []todo.Todo{
+				{
+					Id: 2,
+					Contents: "Test Todo 2",
+					Status: "In Progress",
+				},
+			},
+		},
+		{
+			jsonStr: []byte(`{"contents":"1"}`), 
+			want: []todo.Todo{
+				{
+					Id: 1,
+					Contents: "Test Todo 1",
+					Status: "To Do",
+				},
+			},
+		},
+		{
+			jsonStr: []byte(`{"contents":"Test"}`), 
+			want: []todo.Todo{
+				{
+					Id: 1,
+					Contents: "Test Todo 1",
+					Status: "To Do",
+				},
+				{
+					Id: 2,
+					Contents: "Test Todo 2",
+					Status: "In Progress",
+				},
+				{
+					Id: 3,
+					Contents: "Test Todo 3",
+					Status: "Completed",
+				},
+			},
+		},
+		{
+			jsonStr: []byte(`{"contents":"Non-existent"}`), 
+			want: []todo.Todo{},
+		},
+	}
+
+	for _, test := range cases {
+		responseBody := performRequest(t, "GET", test.jsonStr, 200)
+		defer responseBody.Close()
+
+		respBody, err := io.ReadAll(responseBody)
+		if err != nil {
+			t.Error(err)
+		}
+
+		body := []todo.Todo{}
+		json.Unmarshal(respBody, &body)
+
+		if !reflect.DeepEqual(body, test.want){
+			t.Errorf("expecting %v, got %v", test.want, body)
+		}
+	}
+}
+
 func TestPost(t *testing.T){
 	seedTestDatabase()
 
