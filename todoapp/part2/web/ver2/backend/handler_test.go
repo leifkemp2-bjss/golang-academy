@@ -33,6 +33,9 @@ func TestMain(m *testing.M){
 }
 
 func TestList(t *testing.T){
+	// reseed the database to account for if the tests are out of order
+	seedTestDatabase()
+
 	want := []todo.Todo{
 		{Id: 1, Contents: "Test Todo 1", Status: "To Do"},
 		{Id: 2, Contents: "Test Todo 2", Status: "In Progress"},
@@ -127,7 +130,94 @@ func TestGetInvalid(t *testing.T){
 	}
 }
 
-func TestUpdate(t *testing.T){
+func TestPost(t *testing.T){
+	seedTestDatabase()
+
+	want := todo.Todo{
+		Id: 4,
+		Contents: "This is my new todo",
+		Status: "To Do",
+	}
+
+	var jsonStr = []byte(`{"status":"To Do","contents":"This is my new todo"}`)
+	req, err := http.NewRequest("POST", "http://localhost:8082/", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Error(err)
+	}
+
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var body int
+	json.Unmarshal(respBody, &body)
+
+	if body != 4 {
+		t.Errorf("the update function should return the todo's ID after completing the update, got %d", body)
+	}
+
+	todoList, err := database.ListTodos(database.DB)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(todoList.List) != 4 {
+		t.Error("the todo list should have 4 todos after the post")
+	}
+
+	todoGot, err := database.ReadTodo(database.DB, 4)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !reflect.DeepEqual(todoGot, want){
+		t.Errorf("expecting %v, got %v", want, todoGot)
+	}
+}
+
+func TestPostNoBody(t *testing.T){
+	cases := []struct{
+		jsonStr []byte
+		want string
+	}{
+		{jsonStr: []byte(`{"status":"To Do"}`), want: "contents field has not been provided"},
+		{jsonStr: []byte(`{"contents":"This is my new todo"}`), want: "status field has not been provided"},
+	}
+
+	for _, test := range cases {
+		req, err := http.NewRequest("POST", "http://localhost:8082/", bytes.NewBuffer(test.jsonStr))
+		if err != nil {
+			t.Error(err)
+		}
+
+		resp, err := client.Do(req)
+		if err != nil {
+			t.Error(err)
+		}
+
+		defer resp.Body.Close()
+		respBody, err := io.ReadAll(resp.Body)
+		if err != nil {
+			t.Error(err)
+		}
+
+		if resp.StatusCode != 400 {
+			t.Errorf("expecting an error code of 400 when trying to update a todo that doesn't exist, got %d", resp.StatusCode)
+		}
+		if string(respBody) != test.want {
+			t.Errorf("got %s, want '%s'", string(respBody), test.want)
+		}
+	}
+}
+
+func TestPut(t *testing.T){
 	want := todo.Todo{
 		Id: 1,
 		Contents: "Update this todo",
@@ -169,7 +259,7 @@ func TestUpdate(t *testing.T){
 	}
 }
 
-func TestUpdateInvalid(t *testing.T){
+func TestPutInvalid(t *testing.T){
 	var jsonStr = []byte(`{"id":"999","contents":"Non-existent todo (updated)","status":"In Progress"}`)
 	req, err := http.NewRequest("PUT", "http://localhost:8082/", bytes.NewBuffer(jsonStr))
 	if err != nil {
@@ -192,6 +282,32 @@ func TestUpdateInvalid(t *testing.T){
 	}
 	if string(respBody) != "sql: no rows in result set" {
 		t.Errorf("got %s, want 'sql: no rows in result set'", string(respBody))
+	}
+}
+
+func TestPutNoBody(t *testing.T){
+	var jsonStr = []byte(`{"id":"1"}`)
+	req, err := http.NewRequest("PUT", "http://localhost:8082/", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Error(err)
+	}
+
+	defer resp.Body.Close()
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if resp.StatusCode != 400 {
+		t.Errorf("expecting an error code of 400 when trying to update a todo without contents or status, got %d", resp.StatusCode)
+	}
+	if string(respBody) != "content and status fields have not been provided" {
+		t.Errorf("got %s, want 'content and status fields have not been provided'", string(respBody))
 	}
 }
 
