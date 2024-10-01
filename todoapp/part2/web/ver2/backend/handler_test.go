@@ -42,19 +42,10 @@ func TestList(t *testing.T){
 		{Id: 3, Contents: "Test Todo 3", Status: "Completed"},
 	}
 
-	req, err := http.NewRequest("GET", "http://localhost:8082/", nil)
-	if err != nil {
-		t.Error(err)
-	}
+	responseBody := performRequest(t, "GET", nil, 200)
+	defer responseBody.Close()
 
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Error(err)
-	}
-
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(responseBody)
 	if err != nil {
 		t.Error(err)
 	}
@@ -79,19 +70,10 @@ func TestGet(t *testing.T){
 	}
 
 	var jsonStr = []byte(fmt.Sprintf(`{"id":"%d"}`, 2))
-	req, err := http.NewRequest("GET", "http://localhost:8082/", bytes.NewBuffer(jsonStr))
-	if err != nil {
-		t.Error(err)
-	}
+	responseBody := performRequest(t, "GET", jsonStr, 200)
+	defer responseBody.Close()
 
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Error(err)
-	}
-
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(responseBody)
 	if err != nil {
 		t.Error(err)
 	}
@@ -106,25 +88,14 @@ func TestGet(t *testing.T){
 
 func TestGetInvalid(t *testing.T){
 	var jsonStr = []byte(fmt.Sprintf(`{"id":"%d"}`, 999))
-	req, err := http.NewRequest("GET", "http://localhost:8082/", bytes.NewBuffer(jsonStr))
+	responseBody := performRequest(t, "GET", jsonStr, 400)
+	defer responseBody.Close()
+
+	respBody, err := io.ReadAll(responseBody)
 	if err != nil {
 		t.Error(err)
 	}
 
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Error(err)
-	}
-
-	defer resp.Body.Close()
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if resp.StatusCode != 400 {
-		t.Errorf("expecting an error code of 400 when trying to read an id that is not present, got %d", resp.StatusCode)
-	}
 	if string(respBody) != "sql: no rows in result set" {
 		t.Errorf("got %s, want 'sql: no rows in result set'", string(respBody))
 	}
@@ -140,19 +111,10 @@ func TestPost(t *testing.T){
 	}
 
 	var jsonStr = []byte(`{"status":"To Do","contents":"This is my new todo"}`)
-	req, err := http.NewRequest("POST", "http://localhost:8082/", bytes.NewBuffer(jsonStr))
-	if err != nil {
-		t.Error(err)
-	}
+	responseBody := performRequest(t, "POST", jsonStr, 200)
+	defer responseBody.Close()
 
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Error(err)
-	}
-
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(responseBody)
 	if err != nil {
 		t.Error(err)
 	}
@@ -192,25 +154,14 @@ func TestPostNoBody(t *testing.T){
 	}
 
 	for _, test := range cases {
-		req, err := http.NewRequest("POST", "http://localhost:8082/", bytes.NewBuffer(test.jsonStr))
+		responseBody := performRequest(t, "POST", test.jsonStr, 400)
+		defer responseBody.Close()
+
+		respBody, err := io.ReadAll(responseBody)
 		if err != nil {
 			t.Error(err)
 		}
 
-		resp, err := client.Do(req)
-		if err != nil {
-			t.Error(err)
-		}
-
-		defer resp.Body.Close()
-		respBody, err := io.ReadAll(resp.Body)
-		if err != nil {
-			t.Error(err)
-		}
-
-		if resp.StatusCode != 400 {
-			t.Errorf("expecting an error code of 400 when trying to update a todo that doesn't exist, got %d", resp.StatusCode)
-		}
 		if string(respBody) != test.want {
 			t.Errorf("got %s, want '%s'", string(respBody), test.want)
 		}
@@ -219,7 +170,7 @@ func TestPostNoBody(t *testing.T){
 
 func TestPut(t *testing.T){
 	seedTestDatabase()
-	
+
 	want := todo.Todo{
 		Id: 1,
 		Contents: "Update this todo",
@@ -227,19 +178,10 @@ func TestPut(t *testing.T){
 	}
 
 	var jsonStr = []byte(`{"id":"1","status":"In Progress","contents":"Update this todo"}`)
-	req, err := http.NewRequest("PUT", "http://localhost:8082/", bytes.NewBuffer(jsonStr))
-	if err != nil {
-		t.Error(err)
-	}
+	responseBody := performRequest(t, "PUT", jsonStr, 200)
+	defer responseBody.Close()
 
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Error(err)
-	}
-
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(responseBody)
 	if err != nil {
 		t.Error(err)
 	}
@@ -263,25 +205,14 @@ func TestPut(t *testing.T){
 
 func TestPutInvalid(t *testing.T){
 	var jsonStr = []byte(`{"id":"999","contents":"Non-existent todo (updated)","status":"In Progress"}`)
-	req, err := http.NewRequest("PUT", "http://localhost:8082/", bytes.NewBuffer(jsonStr))
+	responseBody := performRequest(t, "PUT", jsonStr, 400)
+	defer responseBody.Close()
+
+	respBody, err := io.ReadAll(responseBody)
 	if err != nil {
 		t.Error(err)
 	}
 
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Error(err)
-	}
-
-	defer resp.Body.Close()
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if resp.StatusCode != 400 {
-		t.Errorf("expecting an error code of 400 when trying to update a todo that doesn't exist, got %d", resp.StatusCode)
-	}
 	if string(respBody) != "sql: no rows in result set" {
 		t.Errorf("got %s, want 'sql: no rows in result set'", string(respBody))
 	}
@@ -289,27 +220,54 @@ func TestPutInvalid(t *testing.T){
 
 func TestPutNoBody(t *testing.T){
 	var jsonStr = []byte(`{"id":"1"}`)
-	req, err := http.NewRequest("PUT", "http://localhost:8082/", bytes.NewBuffer(jsonStr))
+	responseBody := performRequest(t, "PUT", jsonStr, 400)
+	defer responseBody.Close()
+
+	respBody, err := io.ReadAll(responseBody)
 	if err != nil {
 		t.Error(err)
 	}
 
-	resp, err := client.Do(req)
-	if err != nil {
-		t.Error(err)
-	}
-
-	defer resp.Body.Close()
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if resp.StatusCode != 400 {
-		t.Errorf("expecting an error code of 400 when trying to update a todo without contents or status, got %d", resp.StatusCode)
-	}
 	if string(respBody) != "content and status fields have not been provided" {
 		t.Errorf("got %s, want 'content and status fields have not been provided'", string(respBody))
+	}
+}
+
+func TestDelete(t *testing.T){
+	seedTestDatabase()
+
+	var jsonStr = []byte(`{"id":"1"}`)
+	responseBody := performRequest(t, "DELETE", jsonStr, 200)
+	responseBody.Close()
+
+	todoList, err := database.ListTodos(database.DB)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(todoList.List) != 2 {
+		t.Error("the todo list should have 2 todos after the delete")
+	}
+
+	_, err = database.ReadTodo(database.DB, 1)
+	if err == nil {
+		t.Error("expecting an error when attempting to look for deleted todo of id 1")
+	}
+}
+
+func TestDeleteInvalid(t *testing.T){
+	seedTestDatabase()
+
+	var jsonStr = []byte(`{"id":"999"}`)
+	// deleting an invalid todo should do nothing, and return an OK status
+	responseBody := performRequest(t, "DELETE", jsonStr, 200)
+	responseBody.Close()
+
+	todoList, err := database.ListTodos(database.DB)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(todoList.List) != 3 {
+		t.Error("the todo list should be unaffected by an invalid delete (have 3 todos)")
 	}
 }
 
@@ -347,4 +305,21 @@ func seedTestDatabase(){
 
 func deleteTestDatabase(){
 	database.DB.Exec("DROP TABLE todostest")
+}
+
+func performRequest(t *testing.T, verb string, jsonStr []byte, expectedStatusCode int) io.ReadCloser {
+	req, err := http.NewRequest(verb, "http://localhost:8082/", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		t.Error(err)
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if resp.StatusCode != expectedStatusCode {
+		t.Errorf("expecting a status code of %d, got %d", expectedStatusCode, resp.StatusCode)
+	}
+	return resp.Body
 }
